@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
+import math
 
 def Gen_RandLine(length, dims=2) :
     """
@@ -26,6 +27,30 @@ def Gen_RandLine(length, dims=2) :
 
     return lineData
 
+def Gen_StraightLine(length, dims=2) :
+    # Create sine wave
+    lineData = np.empty((dims, length))
+    lineData[:, 0] = np.random.rand(dims)
+    for index in range(1, length) :
+        step = ((np.random.rand(dims) - 0.5) * 0.1)
+        print step
+        lineData[:, index] = lineData[:, index-1] + step
+
+    return lineData
+
+def Gen_Sine(length, dims=2) :
+    # Create sine wave
+    
+    lineData = np.empty((dims, length))
+    lineData[:, 0] = np.random.rand(dims)
+
+    x = math.pi
+    
+    for index in range(1, length) :
+        step = np.array([math.sin(index),math.sin(index),math.sin(index)])
+        lineData[:, index] = lineData[:, index-1] + step
+    return lineData
+
 def update_lines(num, dataLines, lines) :
     for line, data in zip(lines, dataLines) :
         # NOTE: there is no .set_data() for 3 dim data...
@@ -42,8 +67,10 @@ num_of_particles = 2
 
 # Generate lines
 
-length_of_line = 5000
-data = [Gen_RandLine(length_of_line, 3) for index in range(num_of_particles)]
+length_of_line = 50
+#data = [Gen_RandLine(length_of_line, 3) for index in range(num_of_particles)]
+#data = [Gen_StraightLine(length_of_line, 3) for index in range(num_of_particles)]
+data = [Gen_Sine(length_of_line, 3) for index in range(num_of_particles)]
 
 # Creating fifty line objects.
 # NOTE: Can't pass empty arrays into 3d version of plot()
