@@ -10,12 +10,29 @@ ax = plt.axes(xlim=(0, 100), ylim=(0, 100))
 enemy = plt.Circle((10, -10), 0.75, fc='r')
 agent = plt.Circle((10, -10), 0.75, fc='b')
 
+
+
 def init():
     enemy.center = (5, 5)
     agent.center = (5, 5)
-    ax.add_patch(enemy)
     ax.add_patch(agent)
+    ax.add_patch(enemy)
+    
     return enemy,
+
+def animationManage(i,agent,enemy):
+    #patches = []
+    
+    enemy_patches = animateCos(i,enemy)
+    #agent_patches = animateLine(i,agent)
+
+    #patches = [enemy_patches, agent_patches]
+
+    #patches.append(ax.add_patch(enemy_patches))
+    #patches.append(ax.add_patch(agent_patches))
+
+    return enemy_patches
+
 
 def animateCirc(i, patch):
     # It seems that i represents time step
@@ -49,11 +66,15 @@ def animateSin(i, patch):
     return patch,
 
 
-anim = animation.FuncAnimation(fig, animateCos, 
+anim = animation.FuncAnimation(fig, animationManage, 
                                init_func=init, 
                                frames=360,
-                               fargs=(enemy,),
+                               fargs=(agent,enemy,),
                                interval=20,
                                blit=True)
+
+
+
+
 
 plt.show()

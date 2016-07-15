@@ -1,23 +1,28 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+from matplotlib import pyplot as plt
+from matplotlib import animation
 
+nx = 20
+ny = 20
 
-def update_line(num, data, line):
-    line.set_data(data[..., :num])
-    return line,
+fig = plt.figure()
+plt.axis([0,nx,0,ny])
+ax = plt.gca()
+ax.set_aspect(1)
 
-fig1 = plt.figure()
+def init():
+    # initialize an empty list of cirlces
+    return []
 
-data = np.random.rand(2, 25)
-print data
-l, = plt.plot([], [], 'r-')
-plt.xlim(0, 1)
-plt.ylim(0, 1)
-plt.xlabel('x')
-plt.title('test')
-line_ani = animation.FuncAnimation(fig1, update_line, 25, fargs=(data, l),
-                                   interval=50, blit=True)
+def animate(i):
+    # draw circles, select to color for the circles based on the input argument i. 
+    someColors = ['r', 'b', 'g', 'm', 'y']
+    patches = []
+    for x in range(0,nx):
+        for y in range(0,ny):
+            patches.append(ax.add_patch( plt.Circle((x+0.5,y+0.5),0.45,color=someColors[i % 5]) ))
+    return patches
 
-
+anim = animation.FuncAnimation(fig, animate, init_func=init,
+                               frames=10, interval=20, blit=True)
 plt.show()
