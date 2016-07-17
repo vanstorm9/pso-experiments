@@ -1,28 +1,32 @@
 import numpy as np
-from matplotlib import pyplot as plt
+from matplotlib.patches import Circle
+from matplotlib.collections import PatchCollection
+import matplotlib.pyplot as plt
+from matplotlib import cm
 from matplotlib import animation
 
-nx = 20
-ny = 20
+fig, ax = plt.subplots()
 
-fig = plt.figure()
-plt.axis([0,nx,0,ny])
-ax = plt.gca()
-ax.set_aspect(1)
+patches = []
+# create circles with random sizes and locations
+N = 10 # number of circles
+x = np.random.rand(N)
+y = np.random.rand(N)
+radii  = 0.1*np.random.rand(N)
+for x1,y1,r in zip(x, y, radii):
+    circle = Circle((x1,y1), r)
+    patches.append(circle)
 
-def init():
-    # initialize an empty list of cirlces
-    return []
+# add these circles to a collection
+p = PatchCollection(patches, cmap=cm.prism, alpha=0.4)
+ax.add_collection(p)
 
 def animate(i):
-    # draw circles, select to color for the circles based on the input argument i. 
-    someColors = ['r', 'b', 'g', 'm', 'y']
-    patches = []
-    for x in range(0,nx):
-        for y in range(0,ny):
-            patches.append(ax.add_patch( plt.Circle((x+0.5,y+0.5),0.45,color=someColors[i % 5]) ))
-    return patches
+    colors = 100*np.random.rand(len(patches)) # random index to color map
+    print colors
+    p.set_array(np.array(colors)) # set new color colors
+    return p,
 
-anim = animation.FuncAnimation(fig, animate, init_func=init,
-                               frames=10, interval=20, blit=True)
+ani = animation.FuncAnimation(fig, animate, frames=50, interval=50)
+
 plt.show()
