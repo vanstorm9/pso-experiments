@@ -12,19 +12,21 @@ ax = plt.axes(xlim=(0, 100), ylim=(0, 100))
 enemy = plt.Circle((10, -10), 0.75, fc='r')
 agent = plt.Circle((10, -10), 0.75, fc='b')
 
-food_test = plt.Circle((10, -10), 0.75, fc='y')
+
 
 def init():
     enemy.center = (5, 5)
+
     agent.center = (random.randint(1, 100), random.randint(1, 100))
-    
-    food_test.center = (10,10)
-
-
     ax.add_patch(agent)
+
+    '''
+    for x in range(0,5):
+        agent_clone = plt.Circle((10, -10), 0.75, fc='b')
+        agent_clone.center = (random.randint(1, 100), random.randint(1, 100))
+        ax.add_patch(agent_clone)
+    '''
     ax.add_patch(enemy)
-    
-    ax.add_patch(food_test)
 
     return []
 
