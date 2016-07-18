@@ -39,7 +39,9 @@ def initalizePosition(agent,enemy):
 
 
 def animationManage(i,agent,enemy):
-    animateCos(i,enemy)
+    #animateCos(i,enemy)
+    animateCirc(i,enemy)
+
     #animateLine(i,agent)
     followTarget(i,agent,enemy)
     
@@ -54,7 +56,7 @@ def followTarget(i, patch, enemy_patch):
 
     # Implementing:
     # x(t+1) = x(t) + v(t + 1)
-
+    print v_y
     # x position
     x += v_x
 
@@ -79,9 +81,12 @@ def velocity_calc(agent_patch, enemy_patch):
 
     velo_vect = np.array([0.0,0.0], dtype='f')
     
+    velo_vect[0] = (x_e - x)* 0.1
+    velo_vect[1] = (y_e - y)* 0.1
     
-    velo_vect[0] = x_e - x
-    velo_vect[1] = 0.25
+    #velo_vect[1] = 0.25
+    #velo_vect[0] = 0.25
+    
 
     '''
     velo_vect[0] = 0.25
@@ -112,6 +117,14 @@ def animateCos(i, patch):
     return patch,
 
 
+def animateCirc(i, patch):
+    # It seems that i represents time step
+    x, y = patch.center
+    # 1st constant = position and 2nd constant = trajectory
+    x = 50 + 30 * np.sin(np.radians(i))
+    y = 50 + 30 * np.cos(np.radians(i))
+    patch.center = (x, y)
+    return patch,
 
 
 
