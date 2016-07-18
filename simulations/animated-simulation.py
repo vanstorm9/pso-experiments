@@ -40,52 +40,20 @@ def initalizePosition(agent,enemy):
 
 def animationManage(i,agent,enemy):
     animateCos(i,enemy)
-    animateLine(i,agent)
-    #goToFood(i,agent,enemy)
+    #animateLine(i,agent)
+    followTarget(i,agent,enemy)
     
     return []
 
-def goToFood(i, patch, enemy_patch):
+def followTarget(i, patch, enemy_patch):
     # v(t+1) = wv(t) + rand_1()c_1(p(t)  - x(t)) + rand_2()c_2(g(t) - x(t))
     # x(t+1) = x(t) + v(t + 1)
-    
     x, y = patch.center
-    x_e, y_e = enemy_patch.center
-    
-    print y
+    # Calculating velocity
+    v_x, v_y = velocity_calc(patch, enemy_patch)
 
-    # To update the position
-
-    #x += 0.25
-    #x += x_e - x
-    y += y_e - y
-    
-    #x += x_e - x
-    #y += y_e - y
-    
-    patch.center = (x, y)
-    return patch,
-
-
-def velocity_calc(pos_vect):
-
-    velo_vect = np.array([0.0,0.0], dtype='f')
-
-    velo_vect[0] = 0.25
-    velo_vect[1] = 0.25
-    
-    return velo_vect[0], velo_vect[1]
-    
-
-
-def animateLine(i, patch):
-    x, y = patch.center
-    pos_vect = np.array([x,y], dtype='f')
-
-    vel_vect = np.array([1,1])
-    
-
-    v_x, v_y = velocity_calc(pos_vect)
+    # Implementing:
+    # x(t+1) = x(t) + v(t + 1)
 
     # x position
     x += v_x
@@ -96,7 +64,33 @@ def animateLine(i, patch):
     patch.center = (x, y)
     return patch,
 
-'''
+
+def velocity_calc(agent_patch, enemy_patch):
+    
+    x, y = agent_patch.center
+    x_e, y_e = enemy_patch.center
+
+    
+    pos_vect = np.array([x,y], dtype='f')
+
+
+
+    
+
+    velo_vect = np.array([0.0,0.0], dtype='f')
+    
+    
+    velo_vect[0] = x_e - x
+    velo_vect[1] = 0.25
+
+    '''
+    velo_vect[0] = 0.25
+    velo_vect[1] = 0.25
+    '''
+    
+    return velo_vect[0], velo_vect[1]
+    
+
 def animateLine(i, patch):
     x, y = patch.center
 
@@ -104,13 +98,16 @@ def animateLine(i, patch):
     y += 0.25
     patch.center = (x, y)
     return patch,
-'''
+
 
 def animateCos(i, patch):
     x, y = patch.center
+
     x += 0.1
-    y = 50 + 10 * np.cos(np.radians(i))
-    y = 50 
+    #x += 0.4
+
+    y = 50 + 30 * np.cos(np.radians(i))
+    #y = 50 + 10 * np.cos(np.radians(i))
     patch.center = (x, y)
     return patch,
 
