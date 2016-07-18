@@ -2,6 +2,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import animation
 
+import random
+
 fig = plt.figure()
 fig.set_dpi(100)
 fig.set_size_inches(5, 4.5)
@@ -14,7 +16,7 @@ food_test = plt.Circle((10, -10), 0.75, fc='y')
 
 def init():
     enemy.center = (5, 5)
-    agent.center = (5, 5)
+    agent.center = (random.randint(1, 100), random.randint(1, 100))
     
     food_test.center = (10,10)
 
@@ -39,8 +41,8 @@ def initalizePosition(agent,enemy):
 
 
 def animationManage(i,agent,enemy):
-    #animateCos(i,enemy)
-    animateCirc(i,enemy)
+    animateCos(i,enemy)
+    #animateCirc(i,enemy)
 
     #animateLine(i,agent)
     followTarget(i,agent,enemy)
@@ -48,15 +50,16 @@ def animationManage(i,agent,enemy):
     return []
 
 def followTarget(i, patch, enemy_patch):
-    # v(t+1) = wv(t) + rand_1()c_1(p(t)  - x(t)) + rand_2()c_2(g(t) - x(t))
-    # x(t+1) = x(t) + v(t + 1)
     x, y = patch.center
+
+    
     # Calculating velocity
+    # v(t+1) = wv(t) + rand_1()c_1(p(t)  - x(t)) + rand_2()c_2(g(t) - x(t))
     v_x, v_y = velocity_calc(patch, enemy_patch)
 
     # Implementing:
     # x(t+1) = x(t) + v(t + 1)
-    print v_y
+   
     # x position
     x += v_x
 
@@ -66,6 +69,21 @@ def followTarget(i, patch, enemy_patch):
     patch.center = (x, y)
     return patch,
 
+
+def inertia_calc():
+    return 0
+
+
+
+def top_speed_regulate(curr_speed):
+    top_speed = 0.5
+    
+    if curr_speed > top_speed:
+        return top_speed
+    elif curr_speed < -top_speed:
+        return -top_speed
+    else:
+        return curr_speed
 
 def velocity_calc(agent_patch, enemy_patch):
     
@@ -80,18 +98,15 @@ def velocity_calc(agent_patch, enemy_patch):
     
 
     velo_vect = np.array([0.0,0.0], dtype='f')
+    '''
+    velo_vect[0] = top_speed_regulate( (x_e - x)* 0.05 )* random.random() 
+    velo_vect[1] = top_speed_regulate( (y_e - y)* 0.05 )* random.random()
+    '''
     
-    velo_vect[0] = (x_e - x)* 0.1
-    velo_vect[1] = (y_e - y)* 0.1
-    
-    #velo_vect[1] = 0.25
-    #velo_vect[0] = 0.25
-    
+    velo_vect[0] = top_speed_regulate( (x_e - x)* 0.05 )
+    velo_vect[1] = top_speed_regulate( (y_e - y)* 0.05 )
 
-    '''
-    velo_vect[0] = 0.25
-    velo_vect[1] = 0.25
-    '''
+        
     
     return velo_vect[0], velo_vect[1]
     
@@ -131,7 +146,7 @@ def animateCirc(i, patch):
 
 anim = animation.FuncAnimation(fig, animationManage,
                                init_func=init,
-                               frames=360,
+                               frames=1000,
                                fargs=(agent,enemy,),
                                interval=1,
                                blit=True,

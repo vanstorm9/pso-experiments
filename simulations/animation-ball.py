@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import animation
 
+
 fig = plt.figure()
 fig.set_dpi(100)
 fig.set_size_inches(5, 4.5)
