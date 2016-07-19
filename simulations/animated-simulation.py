@@ -229,7 +229,7 @@ def velocity_calc_exit(agent_patch, exit_patch):
 
     dis_limit_thresh = 1 
 
-    topSpeed = 0.6
+    topSpeed = 0.4
 
     velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,topSpeed)
     velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,topSpeed)
