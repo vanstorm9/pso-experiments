@@ -13,10 +13,10 @@ ax = plt.axes(xlim=(0, 100), ylim=(0, 100))
 enemy = plt.Circle((10, -10), 0.95, fc='r')
 agent = plt.Circle((10, -10), 0.95, fc='b')
 
-midpoint = plt.Circle((10, -10), 0.95, fc='y')
-eastpoint = plt.Circle((10, -10), 0.95, fc='y')
-northpoint = plt.Circle((10, -10), 0.95, fc='y')
-westpoint = plt.Circle((10, -10), 0.95, fc='y')
+midpoint = plt.Circle((10, -10), 0.55, fc='y')
+eastpoint = plt.Circle((10, -10), 0.55, fc='y')
+northpoint = plt.Circle((10, -10), 0.55, fc='y')
+westpoint = plt.Circle((10, -10), 0.55, fc='y')
 
 # Adding the exits
 rect_size = 5
@@ -33,6 +33,13 @@ northExit = plt.Rectangle([x_ne - rect_size / 2, y_ne - rect_size / 2], rect_siz
 
 
 patches_ac = []
+
+
+ax.add_patch(midpoint)
+ax.add_patch(northpoint)
+ax.add_patch(eastpoint)
+ax.add_patch(westpoint)
+
 ax.add_patch(agent)
 
 numOfAgents = 7
@@ -46,10 +53,7 @@ for x in range(0, numOfAgents - 1):
 ax.add_patch(enemy)
 
 
-ax.add_patch(midpoint)
-ax.add_patch(northpoint)
-ax.add_patch(eastpoint)
-ax.add_patch(westpoint)
+
 
 
 
@@ -60,7 +64,7 @@ ax.add_patch(northExit)
 
 
 def init():
-    enemy.center = (random.randint(1, 100), random.randint(1, 100))
+    enemy.center = (random.randint(1, 100), random.randint(40, 100))
 
     agent.center = (random.randint(1, 100), random.randint(1, 100))
 
@@ -260,9 +264,9 @@ def velocity_calc_mid(agent_patch, enemy_patch):
     x, y = agent_patch.center
     x_e, y_e, _, _ = getMidDistance(enemy_patch, southExit)
 
-    ########
+    # Even if we don't need the array, it animates the interest points
     interest_ar = getInterestPoints(enemy_patch, southExit)
-    
+    '''
     x_e = interest_ar[2][0]
     y_e = interest_ar[2][1]
 
@@ -271,7 +275,7 @@ def velocity_calc_mid(agent_patch, enemy_patch):
 
     #print x_e , ' ' , y_e 
     #print interest_ar[4]
-    ########
+    '''
 
     velo_vect = np.array([0.0, 0.0], dtype='f')
 
