@@ -28,9 +28,9 @@ northExit = plt.Rectangle([x_ne - rect_size / 2, y_ne - rect_size / 2], rect_siz
 patches_ac = []
 ax.add_patch(agent)
 
-numOfAgents = 10
+numOfAgents = 7
 
-for x in range(0, numOfAgents):
+for x in range(0, numOfAgents - 1):
     agent_clone = plt.Circle((10, -10), 0.95, fc='b')
     agent_clone.center = (random.randint(1, 100), random.randint(1, 100))
     patches_ac.append(agent_clone)
@@ -86,8 +86,9 @@ def followTarget(i, patch, enemy_patch):
     #v_x, v_y = velocity_calc(patch, enemy_patch)
 
     # Will follow midpoint of enemy & exit
+    interest_ar = getInterestPoints(patch, enemy_patch)
     v_x, v_y = velocity_calc_mid(patch, enemy_patch)  
-
+    
     # x position
     x += v_x
 
@@ -98,16 +99,53 @@ def followTarget(i, patch, enemy_patch):
     return patches_ac
 
 
+def getInterestPoints(enemy_patch, exit_patch):
+    # Calculate interest points to attract agents
+
+    # Calculate enemy-to-exit midpoint
+    mid_x, mid_y, rad_x, rad_y = getMidDistance(enemy_patch, exit_patch)
+    
+
+    interest_ar = np.array([[mid_x,mid_y],[0,0],[0,0],[0,0],[0,0]])
+
+    #north
+    interest_ar[1][0] = mid_x 
+    interest_ar[1][1] = mid_y + rad_y
+    
+    #east
+    interest_ar[2][0] = mid_x + rad_x
+    interest_ar[2][1] = mid_y
+
+    #south
+    interest_ar[3][0] = mid_x
+    interest_ar[3][1] = mid_y - rad_y
+    
+    #west
+    interest_ar[4][0] = mid_x - rad_x
+    interest_ar[4][1] = mid_y
+
+    return interest_ar
+
+
 def getMidDistance(enemy_patch, exit_patch):
+    # Get midpoint between enemy agent and exit
+    
     x, y = enemy_patch.center
 
     x_e = x_se
     y_e = y_se
 
+    # Get midpoint values
     mid_x = (x + x_e)/2
     mid_y = (y + y_e)/2
 
-    return mid_x, mid_y
+    # Get radius values
+    rad_x = x_e - x
+    rad_y = y_e - y
+
+    
+    # Returns (midpoint x and y) values and (radius x and y) values
+    return mid_x, mid_y, rad_x, rad_y
 
 def top_speed_regulate(curr_speed, top_speed):
 
@@ -159,7 +197,7 @@ def velocity_calc(agent_patch, enemy_patch):
 def velocity_calc_mid(agent_patch, enemy_patch):
 
     x, y = agent_patch.center
-    x_e, y_e = getMidDistance(enemy_patch, southExit)
+    x_e, y_e, _, _ = getMidDistance(enemy_patch, southExit)
 
 
     velo_vect = np.array([0.0, 0.0], dtype='f')
