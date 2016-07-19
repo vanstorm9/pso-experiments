@@ -8,9 +8,23 @@ fig = plt.figure()
 fig.set_dpi(100)
 fig.set_size_inches(5, 4.5)
 
+# Declaring the enemy and ally agents
 ax = plt.axes(xlim=(0, 100), ylim=(0, 100))
 enemy = plt.Circle((10, -10), 0.75, fc='r')
 agent = plt.Circle((10, -10), 0.75, fc='b')
+
+# Adding the exits
+rect_size = 5
+x_se = 50
+y_se = 0
+ 
+southExit = plt.Rectangle([x_se - rect_size / 2, y_se - rect_size / 2], rect_size + 3, rect_size -2 , facecolor='black', edgecolor='black')
+
+x_ne = 50
+y_ne = 101
+northExit = plt.Rectangle([x_ne - rect_size / 2, y_ne - rect_size / 2], rect_size + 3, rect_size -2 , facecolor='black', edgecolor='black')
+
+
 patches_ac = []
 ax.add_patch(agent)
 
@@ -21,6 +35,9 @@ for x in range(0, 5):
     ax.add_patch(agent_clone)
 
 ax.add_patch(enemy)
+
+ax.add_patch(southExit)
+ax.add_patch(northExit)
 
 
 def init():
