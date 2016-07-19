@@ -76,10 +76,7 @@ def init():
     in_ar = getInterestPoints(enemy, southExit)
     
     
-    northpoint.center = (in_ar[1][0], in_ar[1][1])
-    eastpoint.center = (in_ar[2][0], in_ar[2][1])
-    midpoint.center = (in_ar[3][0], in_ar[3][1])
-    westpoint.center = (in_ar[4][0], in_ar[4][1])
+    
 
 
     return []
@@ -172,6 +169,14 @@ def getInterestPoints(enemy_patch, exit_patch):
     #west
     interest_ar[4][0] = x + rad_y
     interest_ar[4][1] = y - rad_x
+
+
+
+
+    northpoint.center = (interest_ar[1][0], interest_ar[1][1])
+    eastpoint.center = (interest_ar[2][0], interest_ar[2][1])
+    midpoint.center = (interest_ar[3][0], interest_ar[3][1])
+    westpoint.center = (interest_ar[4][0], interest_ar[4][1])
 
     return interest_ar
 
