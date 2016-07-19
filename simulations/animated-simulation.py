@@ -41,7 +41,7 @@ ax.add_patch(northExit)
 
 
 def init():
-    enemy.center = (5, 5)
+    enemy.center = (random.randint(1, 100), random.randint(1, 100))
 
     agent.center = (random.randint(1, 100), random.randint(1, 100))
     for ac in patches_ac:
@@ -50,12 +50,32 @@ def init():
 
 
 def animationManage(i):
-    animateCos(i, enemy)
+    #animateCos(i, enemy)
+    goToExit(i, enemy, southExit)
+    
     followTarget(i, agent, enemy)
     for ac in patches_ac:
         followTarget(i, ac, enemy)
 
     return []
+
+
+def goToExit(i, patch, exit_patch):
+    x, y = patch.center
+    v_x, v_y = velocity_calc_exit(patch, exit_patch)
+
+    
+    # x position
+    x += v_x
+
+    # y position
+    y += v_y
+
+    
+    patch.center = (x, y)
+
+    
+    return patch,
 
 def followTarget(i, patch, enemy_patch):
     x, y = patch.center
@@ -71,8 +91,7 @@ def followTarget(i, patch, enemy_patch):
     return patches_ac
 
 
-def top_speed_regulate(curr_speed):
-    top_speed = 0.5
+def top_speed_regulate(curr_speed, top_speed):
 
     if curr_speed > top_speed:
         return top_speed
@@ -82,6 +101,23 @@ def top_speed_regulate(curr_speed):
         return curr_speed
 
 
+def velocity_calc_exit(agent_patch, exit_patch):
+
+    x, y = agent_patch.center
+    #x_e, y_e = exit_patch.center
+    x_e = x_se
+    y_e = y_se
+
+    velo_vect = np.array([0.0, 0.0], dtype='f')
+
+    dis_limit_thresh = 1 
+
+    velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,0.6)
+    velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,0.6)
+
+    return velo_vect[0], velo_vect[1]
+
+
 def velocity_calc(agent_patch, enemy_patch):
 
     x, y = agent_patch.center
@@ -89,8 +125,10 @@ def velocity_calc(agent_patch, enemy_patch):
 
     velo_vect = np.array([0.0, 0.0], dtype='f')
 
-    velo_vect[0] = top_speed_regulate( (x_e - x)* 0.05 )
-    velo_vect[1] = top_speed_regulate( (y_e - y)* 0.05 )
+    dis_limit_thresh = 1 
+
+    velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,0.3)
+    velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,0.3)
 
     return velo_vect[0], velo_vect[1]
 
@@ -106,7 +144,7 @@ def animateCos(i, patch):
 
 anim = animation.FuncAnimation(fig, animationManage,
                                init_func=init,
-                               frames=1000,
+                               frames=200,
                                interval=1,
                                blit=True,
                                repeat=True)
