@@ -79,7 +79,12 @@ def goToExit(i, patch, exit_patch):
 
 def followTarget(i, patch, enemy_patch):
     x, y = patch.center
-    v_x, v_y = velocity_calc(patch, enemy_patch)
+
+    # Will try to follow enemy
+    #v_x, v_y = velocity_calc(patch, enemy_patch)
+
+    # Will follow midpoint of enemy & exit
+    v_x, v_y = velocity_calc_mid(patch, enemy_patch)  
 
     # x position
     x += v_x
@@ -90,6 +95,17 @@ def followTarget(i, patch, enemy_patch):
     patch.center = (x, y)
     return patches_ac
 
+
+def getMidDistance(enemy_patch, exit_patch):
+    x, y = enemy_patch.center
+
+    x_e = x_se
+    y_e = y_se
+
+    mid_x = (x + x_e)/2
+    mid_y = (y + y_e)/2
+
+    return mid_x, mid_y
 
 def top_speed_regulate(curr_speed, top_speed):
 
@@ -122,6 +138,21 @@ def velocity_calc(agent_patch, enemy_patch):
 
     x, y = agent_patch.center
     x_e, y_e = enemy_patch.center
+
+    velo_vect = np.array([0.0, 0.0], dtype='f')
+
+    dis_limit_thresh = 1 
+
+    velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,0.3)
+    velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,0.3)
+
+    return velo_vect[0], velo_vect[1]
+
+def velocity_calc_mid(agent_patch, enemy_patch):
+
+    x, y = agent_patch.center
+    x_e, y_e = getMidDistance(enemy_patch, southExit)
+
 
     velo_vect = np.array([0.0, 0.0], dtype='f')
 
