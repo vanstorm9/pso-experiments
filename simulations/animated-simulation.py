@@ -10,8 +10,8 @@ fig.set_size_inches(5, 4.5)
 
 # Declaring the enemy and ally agents
 ax = plt.axes(xlim=(0, 100), ylim=(0, 100))
-enemy = plt.Circle((10, -10), 0.75, fc='r')
-agent = plt.Circle((10, -10), 0.75, fc='b')
+enemy = plt.Circle((10, -10), 0.95, fc='r')
+agent = plt.Circle((10, -10), 0.95, fc='b')
 
 # Adding the exits
 rect_size = 5
@@ -28,8 +28,10 @@ northExit = plt.Rectangle([x_ne - rect_size / 2, y_ne - rect_size / 2], rect_siz
 patches_ac = []
 ax.add_patch(agent)
 
-for x in range(0, 5):
-    agent_clone = plt.Circle((10, -10), 0.75, fc='b')
+numOfAgents = 10
+
+for x in range(0, numOfAgents):
+    agent_clone = plt.Circle((10, -10), 0.95, fc='b')
     agent_clone.center = (random.randint(1, 100), random.randint(1, 100))
     patches_ac.append(agent_clone)
     ax.add_patch(agent_clone)
@@ -116,7 +118,7 @@ def top_speed_regulate(curr_speed, top_speed):
     else:
         return curr_speed
 
-
+# Calculate velocity to rush to exit
 def velocity_calc_exit(agent_patch, exit_patch):
 
     x, y = agent_patch.center
@@ -128,12 +130,15 @@ def velocity_calc_exit(agent_patch, exit_patch):
 
     dis_limit_thresh = 1 
 
-    velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,0.6)
-    velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,0.6)
+    topSpeed = 0.6
+
+    velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,topSpeed)
+    velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,topSpeed)
 
     return velo_vect[0], velo_vect[1]
 
 
+# Calculate velocity to chase down enemy
 def velocity_calc(agent_patch, enemy_patch):
 
     x, y = agent_patch.center
@@ -143,11 +148,14 @@ def velocity_calc(agent_patch, enemy_patch):
 
     dis_limit_thresh = 1 
 
-    velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,0.3)
-    velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,0.3)
+    topSpeed = 0.3
+
+    velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,topSpeed)
+    velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,topSpeed)
 
     return velo_vect[0], velo_vect[1]
 
+# Calculate velocity to arrive at midpoint between enemy and exit
 def velocity_calc_mid(agent_patch, enemy_patch):
 
     x, y = agent_patch.center
@@ -158,8 +166,10 @@ def velocity_calc_mid(agent_patch, enemy_patch):
 
     dis_limit_thresh = 1 
 
-    velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,0.3)
-    velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,0.3)
+    topSpeed = 0.3
+
+    velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    , topSpeed)
+    velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    , topSpeed)
 
     return velo_vect[0], velo_vect[1]
 
