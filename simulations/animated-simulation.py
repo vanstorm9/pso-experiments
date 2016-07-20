@@ -74,7 +74,7 @@ ax.add_patch(northExit)
 def init():
     global occupied_ar
     
-    enemy.center = (random.randint(1, 100), random.randint(40, 100))
+    enemy.center = (random.randint(1, 100), random.randint(1, 100))
     agent.center = (random.randint(1, 100), random.randint(1, 100))
 
     occupied_ar = np.zeros([5])
@@ -96,7 +96,7 @@ def init():
 def animationManage(i):
     global occupied_ar
     
-    goToExit(i, enemy, southExit)
+    #goToExit(i, enemy, southExit)
 
     followTarget(i, agent, enemy)
 
@@ -105,6 +105,7 @@ def animationManage(i):
 
 
     # printing tests
+
     if i >= 199:
         print occupied_ar
 
@@ -205,22 +206,38 @@ def findClosestInterest(agent_patch, in_ar):
     index = -1
     smallDis = 999999
 
-    
+    # To check agent's distance of all interest points
     for i in range(0,4):
         dis = abs(int(getDistance(agent_patch, in_ar, i)))
+
+        if occupied_ar[i] == 1:
+            dis = dis*200
   
-        # When we discover shorter distance, replace index        
+        # When we discover unoccupied shorter distance, replace index        
         if dis < smallDis:
             # index is the index of interest_array of the closest interest point 
             smallDis = dis
             index = i
-
-
-    # If the smallest distance is less than 10
-    if smallDis < 1:
+    
+    # At this point, we found a smallest distance, let's update the occupation array
+    # We want to know if interest point is occupied by someone else
+    # If the smallest distance is less than 10, we are currently engaged
+    if smallDis < 2:
         # We are near or at the targeted interest point,
         # now we should update array as occupied
+        
         occupied_ar[index] = 1
+        
+        #print 'engaged index ', index
+    else:
+        # Else we are still far away from the index
+        if occupied_ar[index] == 1:
+            occupied_ar[index] = 0
+            
+            #print 'lost track of index ', index
+        #else:
+            #print 'far away from index ', index
+            
         
     return index
 
