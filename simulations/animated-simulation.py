@@ -42,6 +42,14 @@ ax.add_patch(northpoint)
 ax.add_patch(eastpoint)
 ax.add_patch(westpoint)
 
+# enemy, north, east, south, west
+# 0 represents unoccupied, 1 represent occupied
+global occupied_ar
+occupied_ar = np.array([0,0,0,0,0])
+
+
+
+
 ax.add_patch(agent)
 
 numOfAgents = 7
@@ -64,9 +72,14 @@ ax.add_patch(northExit)
 
 
 def init():
+    global occupied_ar
+    
     enemy.center = (random.randint(1, 100), random.randint(40, 100))
     agent.center = (random.randint(1, 100), random.randint(1, 100))
 
+    occupied_ar = np.zeros([5])
+ 
+    
 
     for ac in patches_ac:
         ac.center = (random.randint(1, 100), random.randint(1, 100))
@@ -81,6 +94,8 @@ def init():
     return []
 
 def animationManage(i):
+    global occupied_ar
+    
     goToExit(i, enemy, southExit)
 
     followTarget(i, agent, enemy)
@@ -88,6 +103,10 @@ def animationManage(i):
     for ac in patches_ac:
         followTarget(i, ac, enemy)
 
+
+    # printing tests
+    if i >= 199:
+        print occupied_ar
 
     return []
 
@@ -181,24 +200,28 @@ def getInterestPoints(enemy_patch, exit_patch):
 
 
 def findClosestInterest(agent_patch, in_ar):
+    global occupied_ar
 
     index = -1
-    smallDis = 999
+    smallDis = 999999
 
     
     for i in range(0,4):
         dis = abs(int(getDistance(agent_patch, in_ar, i)))
   
-        # When we discover higher distance, replace index        
-        if dis < smallDis: 
+        # When we discover shorter distance, replace index        
+        if dis < smallDis:
+            # index is the index of interest_array of the closest interest point 
             smallDis = dis
             index = i
 
-     
 
-    if index < 0:
-        print 'Error when trying to find closest interest: ', index
-    #print index
+    # If the smallest distance is less than 10
+    if smallDis < 1:
+        # We are near or at the targeted interest point,
+        # now we should update array as occupied
+        occupied_ar[index] = 1
+        
     return index
 
 def getDistance(agent_patch, in_ar, index):
@@ -249,7 +272,7 @@ def velocity_calc_exit(agent_patch, exit_patch):
 
     dis_limit_thresh = 1 
 
-    topSpeed = 0.4
+    topSpeed = 0.3
 
     velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,topSpeed)
     velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,topSpeed)
