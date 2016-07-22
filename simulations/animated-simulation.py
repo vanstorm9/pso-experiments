@@ -6,6 +6,14 @@ from random import randint
 import random
 import math
 
+### Variables that we can switch ###
+interestPointVisual = False
+numOfAgents = 12
+
+
+####################################
+
+
 fig = plt.figure()
 fig.set_dpi(100)
 fig.set_size_inches(5, 4.5)
@@ -15,10 +23,28 @@ ax = plt.axes(xlim=(0, 100), ylim=(0, 100))
 enemy = plt.Circle((10, -10), 0.95, fc='r')
 agent = plt.Circle((10, -10), 0.95, fc='b')
 
-midpoint = plt.Circle((10, -10), 0.55, fc='y')
-eastpoint = plt.Circle((10, -10), 0.55, fc='y')
-northpoint = plt.Circle((10, -10), 0.55, fc='y')
-westpoint = plt.Circle((10, -10), 0.55, fc='y')
+
+if interestPointVisual:
+    interestColor = 'y'
+    interestSize = 0.55
+    
+else:
+    interestColor = 'w'
+    interestSize = 0.55
+    #interestSize = 0.000001
+
+
+midpoint = plt.Circle((10, -10), interestSize, fc=interestColor)
+
+eastpoint = plt.Circle((10, -10), interestSize, fc=interestColor)
+northpoint = plt.Circle((10, -10), interestSize, fc=interestColor)
+westpoint = plt.Circle((10, -10), interestSize, fc=interestColor)
+
+
+northeastpoint = plt.Circle((10, -10), interestSize, fc=interestColor)
+mideastpoint = plt.Circle((10, -10), interestSize, fc=interestColor)
+midwestpoint = plt.Circle((10, -10), interestSize, fc=interestColor)
+northwestpoint = plt.Circle((10, -10), interestSize, fc=interestColor)
 
 # Adding the exits
 rect_size = 5
@@ -42,18 +68,22 @@ ax.add_patch(northpoint)
 ax.add_patch(eastpoint)
 ax.add_patch(westpoint)
 
+ax.add_patch(mideastpoint)
+ax.add_patch(midwestpoint)
+ax.add_patch(northeastpoint)
+ax.add_patch(northwestpoint)
+
+
 # enemy, north, east, south, west
 # 0 represents unoccupied, 1 represent occupied
 global occupied_ar
-occupied_ar = np.array([0,0,0,0,0])
+global victory
+
 
 
 
 
 ax.add_patch(agent)
-
-numOfAgents = 7
-
 
 for x in range(0, numOfAgents - 1):
     agent_clone = plt.Circle((10, -10), 0.95, fc='b')
@@ -73,19 +103,18 @@ ax.add_patch(northExit)
 
 def init():
     global occupied_ar
-    
-    enemy.center = (random.randint(1, 100), random.randint(1, 100))
+
+    enemy.center = (50, 50)
+    #enemy.center = (random.randint(1, 100), random.randint(1, 100))
     agent.center = (random.randint(1, 100), random.randint(1, 100))
 
-    occupied_ar = np.zeros([5])
+    occupied_ar = np.zeros([9])
  
     
 
     for ac in patches_ac:
         ac.center = (random.randint(1, 100), random.randint(1, 100))
 
-     # Initalizing visual of interest points
-    in_ar = getInterestPoints(enemy, southExit)
     
     
     
@@ -95,6 +124,7 @@ def init():
 
 def animationManage(i):
     global occupied_ar
+    global victory
     
     #goToExit(i, enemy, southExit)
 
@@ -108,6 +138,7 @@ def animationManage(i):
 
     if i >= 199:
         print occupied_ar
+        print 'Victory: ', victory
 
     return []
 
@@ -161,72 +192,100 @@ def getInterestPoints(enemy_patch, exit_patch):
     # Calculate enemy-to-exit midpoint
     mid_x, mid_y, rad_x, rad_y = getMidDistance(enemy_patch, exit_patch)
 
-    interest_ar = np.array([[mid_x,mid_y],[0,0],[0,0],[0,0],[0,0]])
+    interest_ar = np.array([[mid_x,mid_y],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]])
 
     #north
     interest_ar[1][0] = x - rad_x
     interest_ar[1][1] = y - rad_y
 
-    #print 'mid_x: ', mid_x
-    #print 'mid_y: ', mid_y
-
 
     #east
-    interest_ar[2][0] = x - rad_y
-    interest_ar[2][1] = y + rad_x
+    interest_ar[3][0] = x - rad_y
+    interest_ar[3][1] = y + rad_x
 
-
-    #print interest_ar[2][0]
-    #print interest_ar[2][1]
-    
 
     #south (basically the midpoint)
-    interest_ar[3][0] = x + rad_x
-    interest_ar[3][1] = y + rad_y
+    interest_ar[5][0] = x + rad_x
+    interest_ar[5][1] = y + rad_y
+
+
+    #west
+    interest_ar[7][0] = x + rad_y
+    interest_ar[7][1] = y - rad_x
+
+
+
+
+    # northeast
+    interest_ar[2][0] = (interest_ar[1][0] + interest_ar[3][0])/2
+    interest_ar[2][1] = (interest_ar[1][1] + interest_ar[3][1])/2
+
+    #southeast
+    interest_ar[4][0] = (interest_ar[3][0] + interest_ar[5][0])/2
+    interest_ar[4][1] = (interest_ar[3][1] + interest_ar[5][1])/2
+
+    #southwest
+    interest_ar[6][0] = (interest_ar[5][0] + interest_ar[7][0])/2
+    interest_ar[6][1] = (interest_ar[5][1] + interest_ar[7][1])/2
+
+    interest_ar[8][0] = (interest_ar[7][0] + interest_ar[1][0])/2
+    interest_ar[8][1] = (interest_ar[7][1] + interest_ar[1][1])/2
 
     
-    #west
-    interest_ar[4][0] = x + rad_y
-    interest_ar[4][1] = y - rad_x
-
-
-
 
     northpoint.center = (interest_ar[1][0], interest_ar[1][1])
-    eastpoint.center = (interest_ar[2][0], interest_ar[2][1])
-    midpoint.center = (interest_ar[3][0], interest_ar[3][1])
-    westpoint.center = (interest_ar[4][0], interest_ar[4][1])
+    eastpoint.center = (interest_ar[3][0], interest_ar[3][1])
+    midpoint.center = (interest_ar[5][0], interest_ar[5][1])
+    westpoint.center = (interest_ar[7][0], interest_ar[7][1])
+
+    mideastpoint.center = (interest_ar[2][0], interest_ar[2][1])
+    midwestpoint.center = (interest_ar[4][0], interest_ar[4][1])
+    northeastpoint.center = (interest_ar[6][0], interest_ar[6][1])
+    northwestpoint.center = (interest_ar[8][0], interest_ar[8][1])
+
 
     return interest_ar
 
 
 def findClosestInterest(agent_patch, in_ar):
+    # north east is (north/2) + (south/2)
     global occupied_ar
+    global victory
+
+    victory = False
 
     index = -1
     smallDis = 999999
 
     # To check agent's distance of all interest points
-    for i in range(0,4):
+    for i in range(0,9):
         dis = abs(int(getDistance(agent_patch, in_ar, i)))
 
+        if i == 0:
+            dis = dis*0.5
+
         if occupied_ar[i] == 1:
-            dis = dis*200
-  
+            # we must write a condition so that agent knows it is the
+            # one that is occupying it
+            dis = dis*20
+
+
+        
         # When we discover unoccupied shorter distance, replace index        
         if dis < smallDis:
             # index is the index of interest_array of the closest interest point 
             smallDis = dis
             index = i
     
-    # At this point, we found a smallest distance, let's update the occupation array
-    # We want to know if interest point is occupied by someone else
     # If the smallest distance is less than 10, we are currently engaged
-    if smallDis < 2:
+    if smallDis < 1:
         # We are near or at the targeted interest point,
         # now we should update array as occupied
         
         occupied_ar[index] = 1
+
+        if smallDis < 3 and occupied_ar[0] == 1:
+            victory = True
         
         #print 'engaged index ', index
     else:
