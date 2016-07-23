@@ -8,8 +8,13 @@ import math
 
 ### Variables that we can switch ###
 interestPointVisual = False
+huntEnemy = False
 numOfAgents = 12
 
+enemyTopSpeed = 0.4
+topSpeed = 0.3
+
+secondDoor = False
 
 ####################################
 
@@ -32,6 +37,7 @@ else:
     interestColor = 'w'
     interestSize = 0.55
     #interestSize = 0.000001
+
 
 
 midpoint = plt.Circle((10, -10), interestSize, fc=interestColor)
@@ -57,21 +63,23 @@ southExit = plt.Rectangle([x_se_s - rect_size / 2, y_se - rect_size / 2], rect_s
 
 x_ne = 50
 y_ne = 101
-northExit = plt.Rectangle([x_ne - rect_size / 2, y_ne - rect_size / 2], rect_size + 3, rect_size -2 , facecolor='black', edgecolor='black')
+
+if secondDoor:
+    northExit = plt.Rectangle([x_ne - rect_size / 2, y_ne - rect_size / 2], rect_size + 3, rect_size -2 , facecolor='black', edgecolor='black')
 
 
 patches_ac = []
 
+if interestPointVisual:
+    ax.add_patch(midpoint)
+    ax.add_patch(northpoint)
+    ax.add_patch(eastpoint)
+    ax.add_patch(westpoint)
 
-ax.add_patch(midpoint)
-ax.add_patch(northpoint)
-ax.add_patch(eastpoint)
-ax.add_patch(westpoint)
-
-ax.add_patch(mideastpoint)
-ax.add_patch(midwestpoint)
-ax.add_patch(northeastpoint)
-ax.add_patch(northwestpoint)
+    ax.add_patch(mideastpoint)
+    ax.add_patch(midwestpoint)
+    ax.add_patch(northeastpoint)
+    ax.add_patch(northwestpoint)
 
 
 # enemy, north, east, south, west
@@ -95,7 +103,9 @@ ax.add_patch(enemy)
 
 # Adding exit patches
 ax.add_patch(southExit)
-ax.add_patch(northExit)
+
+if secondDoor:
+    ax.add_patch(northExit)
 
 
 
@@ -104,8 +114,8 @@ ax.add_patch(northExit)
 def init():
     global occupied_ar
 
-    enemy.center = (50, 50)
-    #enemy.center = (random.randint(1, 100), random.randint(1, 100))
+    #enemy.center = (50, 50)
+    enemy.center = (random.randint(1, 100), random.randint(60, 100))
     agent.center = (random.randint(1, 100), random.randint(1, 100))
 
     occupied_ar = np.zeros([9])
@@ -130,7 +140,7 @@ def animationManage(i):
 
     timeStep = i
     
-    #goToExit(i, enemy, southExit)
+    goToExit(i, enemy, southExit)
     agentID = 1
     followTarget(i, agent, enemy)
     
@@ -260,6 +270,7 @@ def findClosestInterest(agent_patch, in_ar):
     global victory
     global agentID
     global timeStep
+    global huntEnemy
 
     victory = False
 
@@ -269,30 +280,50 @@ def findClosestInterest(agent_patch, in_ar):
 
     tempAr = np.zeros([9])
     
+    if huntEnemy:
+        minDis = 0
+    else:
+        minDis = 1
+
     # To check agent's distance of all interest points
-    for i in range(0,9):
+    for i in range(minDis,9):
         dis = abs(int(getDistance(agent_patch, in_ar, i)))
 
 
-       
-        if i == 0:
-            dis = dis*0.5
+       # Add heavy weights to charge at enemy
+        #if i == 0:
+        #    dis = dis*0.5
 
         
 
         if occupied_ar[i] != 0:
             # we must write a condition so that agent knows it is the
             # one that is occupying it
-            dis = dis*99999
+            dis = dis*5
 
-        
-        
-        
+        '''
+        # Add heavy weights to go in front
+        if i == 3 or i == 4 or i == 5 or i == 6 or i == 7:
+
+            if i == 5:
+                dis = dis*0.01
+            elif i == 4 or i == 6:
+                dis = dis*0.15
+            elif i == 3 or i == 7:
+                dis = dis*0.20
+        '''
+        # Add heavy weights to avoid the back
+        if i == 1 or i == 8 or i == 2:
+
+            if i == 1:
+                dis = dis*2
+            elif i == 2 or i == 8:
+                dis = dis*3
+            
 
         tempAr[i] = dis
 
-        if i ==9 and occupied_ar[0] != 0:
-            print tempAR[i]
+  
 
         
         # When we discover unoccupied shorter distance, replace index        
@@ -305,7 +336,7 @@ def findClosestInterest(agent_patch, in_ar):
     # If the smallest distance is less than 10, we are currently engaged
 
 
-    if smallDis < 1:
+    if smallDis < 0.5:
         # We are near or at the targeted interest point,
         # now we should update array as occupied
 
@@ -378,10 +409,10 @@ def velocity_calc_exit(agent_patch, exit_patch):
 
     dis_limit_thresh = 1 
 
-    topSpeed = 0.3
+    
 
-    velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,topSpeed)
-    velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,topSpeed)
+    velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,enemyTopSpeed)
+    velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,enemyTopSpeed)
 
     return velo_vect[0], velo_vect[1]
 
@@ -396,7 +427,7 @@ def velocity_calc(agent_patch, enemy_patch):
 
     dis_limit_thresh = 1 
 
-    topSpeed = 0.3
+    
 
     velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    ,topSpeed)
     velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    ,topSpeed)
