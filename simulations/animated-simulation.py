@@ -6,7 +6,7 @@ from random import randint
 import random
 import math
 
-### Variables that we can switch ###
+### Variables that we can play with ###
 interestPointVisual = False
 huntEnemy = False
 numOfAgents = 12
@@ -15,9 +15,13 @@ enemyTopSpeed = 0.4
 topSpeed = 0.3
 
 secondDoor = False
+resultVisual = False
 
+maxFrame = 300
 ####################################
 
+
+phaseCount = 0
 
 fig = plt.figure()
 fig.set_dpi(100)
@@ -137,6 +141,8 @@ def animationManage(i):
     global victory
     global agentID
     global timeStep
+    global phaseCount
+    global maxFrame
 
     timeStep = i
     
@@ -151,9 +157,13 @@ def animationManage(i):
 
     # printing tests
 
-    if i >= 199:
-        print occupied_ar
-        print 'Victory: ', victory
+    
+    if i >= maxFrame - 1:
+        print 'Phase ', phaseCount
+        phaseCount += 1
+        if resultVisual:
+            print occupied_ar
+            print 'Victory: ', victory
 
     return []
 
@@ -271,6 +281,7 @@ def findClosestInterest(agent_patch, in_ar):
     global agentID
     global timeStep
     global huntEnemy
+    
 
     victory = False
 
@@ -478,7 +489,7 @@ def animateCos(i, patch):
 
 anim = animation.FuncAnimation(fig, animationManage,
                                init_func=init,
-                               frames=200,
+                               frames=maxFrame,
                                interval=1,
                                blit=True,
                                repeat=True)
