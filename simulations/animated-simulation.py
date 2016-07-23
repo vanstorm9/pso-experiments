@@ -78,8 +78,8 @@ ax.add_patch(northwestpoint)
 # 0 represents unoccupied, 1 represent occupied
 global occupied_ar
 global victory
-
-
+global agentID
+global timeStep
 
 
 
@@ -125,12 +125,17 @@ def init():
 def animationManage(i):
     global occupied_ar
     global victory
+    global agentID
+    global timeStep
+
+    timeStep = i
     
     #goToExit(i, enemy, southExit)
-
+    agentID = 0
     followTarget(i, agent, enemy)
-
+    
     for ac in patches_ac:
+        agentID = agentID + 1
         followTarget(i, ac, enemy)
 
 
@@ -248,43 +253,91 @@ def getInterestPoints(enemy_patch, exit_patch):
 
 
 def findClosestInterest(agent_patch, in_ar):
+    # For some reason, north never gets occupied
+    
     # north east is (north/2) + (south/2)
     global occupied_ar
     global victory
+    global agentID
+    global timeStep
 
     victory = False
 
     index = -1
     smallDis = 999999
+  
 
+    tempAr = np.zeros([9])
+    
     # To check agent's distance of all interest points
-    for i in range(0,9):
+    for i in range(0,8):
         dis = abs(int(getDistance(agent_patch, in_ar, i)))
-
+        '''
+        if dis == 0:
+            print '-------------------'
+            print 'agent: ', agentID
+            print '-------------------'
+            print 'time step: ',timeStep 
+            print 'agentcent: ', agent_patch.center
+            print 'index: ', i
+            print 'loc of index: ', in_ar[i]
+            print 'dis: ', dis
+            print 'smallest dist: ', smallDis
+            print '------------------'
+        '''
         if i == 0:
             dis = dis*0.5
 
         if occupied_ar[i] == 1:
             # we must write a condition so that agent knows it is the
             # one that is occupying it
-            dis = dis*20
+            dis = dis*99999
+            
 
-
+        tempAr[i] = dis
         
         # When we discover unoccupied shorter distance, replace index        
         if dis < smallDis:
+            
             # index is the index of interest_array of the closest interest point 
             smallDis = dis
             index = i
     
     # If the smallest distance is less than 10, we are currently engaged
+
+    
+    
     if smallDis < 1:
         # We are near or at the targeted interest point,
         # now we should update array as occupied
-        
+        '''
+        if agent_patch.center[0] > 72 and agent_patch.center[1] > 47:
+            print '^^^^^^^'
+            print '^^^^^^^'
+            print '^^^^^^^'
+            print '^^^^^^^'
+            print '^^^^^^^'
+            print '^^^^^^^'
+            print 'agent: ', agentID
+            print 'time step: ',timeStep
+            print 'agentcent: ', agent_patch.center
+            print 'best index', index
+            print 'loc of index: ', in_ar[index]
+            print 'occupied: ', occupied_ar
+            print 'distange ranges: ',tempAr.astype(int)
+            print 'smallest dist: ', smallDis
+            print '^^^^^^^'
+            print '^^^^^^^'
+            print '^^^^^^^'
+            print '^^^^^^^'
+            print '^^^^^^^'
+            print '^^^^^^^'
+       '''
+
+       
         occupied_ar[index] = 1
 
-        if smallDis < 3 and occupied_ar[0] == 1:
+        if occupied_ar[0] == 1:
             victory = True
         
         #print 'engaged index ', index
@@ -292,6 +345,8 @@ def findClosestInterest(agent_patch, in_ar):
         # Else we are still far away from the index
         if occupied_ar[index] == 1:
             occupied_ar[index] = 0
+            if index == 1:
+                print 'index 1 not occupied'
             
             #print 'lost track of index ', index
         #else:
@@ -306,7 +361,7 @@ def getDistance(agent_patch, in_ar, index):
     y_t = in_ar[index][1]
 
     # get distance between two particles
-    return math.sqrt(abs((x_t - x_a) + (y_t - y_a)))
+    return math.sqrt(abs(x_t - x_a) + abs(y_t - y_a))
     
 
 def getMidDistance(enemy_patch, exit_patch):
