@@ -361,7 +361,7 @@ def getDistance(agent_patch, in_ar, index):
     y_t = in_ar[index][1]
 
     # get distance between two particles
-    return math.sqrt(abs(x_t - x_a) + abs(y_t - y_a))
+    return math.sqrt((x_t - x_a)**2 + (y_t - y_a)**2)
     
 
 def getMidDistance(enemy_patch, exit_patch):
