@@ -131,7 +131,7 @@ def animationManage(i):
     timeStep = i
     
     #goToExit(i, enemy, southExit)
-    agentID = 0
+    agentID = 1
     followTarget(i, agent, enemy)
     
     for ac in patches_ac:
@@ -270,83 +270,57 @@ def findClosestInterest(agent_patch, in_ar):
     tempAr = np.zeros([9])
     
     # To check agent's distance of all interest points
-    for i in range(1,8):
+    for i in range(0,9):
         dis = abs(int(getDistance(agent_patch, in_ar, i)))
-        '''
-        if dis == 0:
-            print '-------------------'
-            print 'agent: ', agentID
-            print '-------------------'
-            print 'time step: ',timeStep 
-            print 'agentcent: ', agent_patch.center
-            print 'index: ', i
-            print 'loc of index: ', in_ar[i]
-            print 'dis: ', dis
-            print 'smallest dist: ', smallDis
-            print '------------------'
-        '''
-        #if i == 0:
-        #    dis = dis*0.5
 
-        if occupied_ar[i] == 1:
+
+       
+        if i == 0:
+            dis = dis*0.5
+
+        
+
+        if occupied_ar[i] != 0:
             # we must write a condition so that agent knows it is the
             # one that is occupying it
             dis = dis*99999
-            
+
+        
+        
+        
 
         tempAr[i] = dis
+
+        if i ==9 and occupied_ar[0] != 0:
+            print tempAR[i]
+
         
         # When we discover unoccupied shorter distance, replace index        
         if dis < smallDis:
             
-            # index is the index of interest_array of the closest interest point 
+            # index is agent_patch.center[0] < 47 and agent_patch.center[0] > 53the index of interest_array of the closest interest point 
             smallDis = dis
             index = i
     
     # If the smallest distance is less than 10, we are currently engaged
 
-    
-    
+
     if smallDis < 1:
         # We are near or at the targeted interest point,
         # now we should update array as occupied
-        '''
-        if agent_patch.center[1] < 27:
-            print '^^^^^^^'
-            print '^^^^^^^'
-            print '^^^^^^^'
-            print '^^^^^^^'
-            print '^^^^^^^'
-            print '^^^^^^^'
-            print 'agent: ', agentID
-            print 'time step: ',timeStep
-            print 'agentcent: ', agent_patch.center
-            print 'best index', index
-            print 'loc of index: ', in_ar[index]
-            print 'occupied: ', occupied_ar
-            print 'distange ranges: ',tempAr.astype(int)
-            print 'smallest dist: ', smallDis
-            print '^^^^^^^'
-            print '^^^^^^^'
-            print '^^^^^^^'
-            print '^^^^^^^'
-            print '^^^^^^^'
-            print '^^^^^^^'
-       '''
 
-       
-        occupied_ar[index] = 1
+  
+        occupied_ar[index] = agentID
 
-        if occupied_ar[0] == 1:
+        if occupied_ar[0] != 0:
             victory = True
         
         #print 'engaged index ', index
     else:
         # Else we are still far away from the index
-        if occupied_ar[index] == 1:
+        if occupied_ar[index] == agentID:
             occupied_ar[index] = 0
-            if index == 1:
-                print 'index 1 not occupied'
+            
             
             #print 'lost track of index ', index
         #else:
