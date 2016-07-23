@@ -197,7 +197,7 @@ def getInterestPoints(enemy_patch, exit_patch):
     # Calculate enemy-to-exit midpoint
     mid_x, mid_y, rad_x, rad_y = getMidDistance(enemy_patch, exit_patch)
 
-    interest_ar = np.array([[mid_x,mid_y],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]])
+    interest_ar = np.array([[x,y],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]])
 
     #north
     interest_ar[1][0] = x - rad_x
@@ -218,7 +218,7 @@ def getInterestPoints(enemy_patch, exit_patch):
     interest_ar[7][0] = x + rad_y
     interest_ar[7][1] = y - rad_x
 
-
+   
 
 
     # northeast
@@ -237,7 +237,7 @@ def getInterestPoints(enemy_patch, exit_patch):
     interest_ar[8][1] = (interest_ar[7][1] + interest_ar[1][1])/2
 
     
-
+    # Setting up visuals
     northpoint.center = (interest_ar[1][0], interest_ar[1][1])
     eastpoint.center = (interest_ar[3][0], interest_ar[3][1])
     midpoint.center = (interest_ar[5][0], interest_ar[5][1])
@@ -270,7 +270,7 @@ def findClosestInterest(agent_patch, in_ar):
     tempAr = np.zeros([9])
     
     # To check agent's distance of all interest points
-    for i in range(0,8):
+    for i in range(1,8):
         dis = abs(int(getDistance(agent_patch, in_ar, i)))
         '''
         if dis == 0:
@@ -285,8 +285,8 @@ def findClosestInterest(agent_patch, in_ar):
             print 'smallest dist: ', smallDis
             print '------------------'
         '''
-        if i == 0:
-            dis = dis*0.5
+        #if i == 0:
+        #    dis = dis*0.5
 
         if occupied_ar[i] == 1:
             # we must write a condition so that agent knows it is the
@@ -311,7 +311,7 @@ def findClosestInterest(agent_patch, in_ar):
         # We are near or at the targeted interest point,
         # now we should update array as occupied
         '''
-        if agent_patch.center[0] > 72 and agent_patch.center[1] > 47:
+        if agent_patch.center[1] < 27:
             print '^^^^^^^'
             print '^^^^^^^'
             print '^^^^^^^'
@@ -359,6 +359,7 @@ def getDistance(agent_patch, in_ar, index):
     x_a, y_a = agent_patch.center
     x_t = in_ar[index][0]
     y_t = in_ar[index][1]
+
 
     # get distance between two particles
     return math.sqrt((x_t - x_a)**2 + (y_t - y_a)**2)
