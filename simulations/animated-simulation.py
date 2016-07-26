@@ -8,10 +8,10 @@ import math
 
 ### Variables that we can play with ###
 interestPointVisual = False
-huntEnemy = False
-numOfAgents = 12
+huntEnemy = True
+numOfAgents = 10
 
-enemyTopSpeed = 0.4
+enemyTopSpeed = 0.5
 topSpeed = 0.3
 
 secondDoor = False
@@ -93,6 +93,8 @@ global victory
 global agentID
 global timeStep
 
+global agentLocationAR
+
 
 
 ax.add_patch(agent)
@@ -112,32 +114,32 @@ if secondDoor:
     ax.add_patch(northExit)
 
 
-
-
+    
 
 def init():
     global occupied_ar
-
+    global agentLocationAR
+    
     #enemy.center = (50, 50)
-    enemy.center = (random.randint(1, 100), random.randint(60, 100))
+    enemy.center = (random.randint(1, 100), random.randint(55, 100))
     agent.center = (random.randint(1, 100), random.randint(1, 100))
 
     occupied_ar = np.zeros([9])
- 
+    agentLocationAR = np.zeros((numOfAgents,2))
     
 
     for ac in patches_ac:
         ac.center = (random.randint(1, 100), random.randint(1, 100))
 
     
-    
-    
+
 
 
     return []
 
 def animationManage(i):
     global occupied_ar
+    global agentLocationAR
     global victory
     global agentID
     global timeStep
@@ -146,15 +148,19 @@ def animationManage(i):
 
     timeStep = i
     
-    goToExit(i, enemy, southExit)
+    
     agentID = 1
     followTarget(i, agent, enemy)
+    
+    agentLocationAR[agentID-1][0], agentLocationAR[agentID-1][1] = agent.center
     
     for ac in patches_ac:
         agentID = agentID + 1
         followTarget(i, ac, enemy)
 
+        agentLocationAR[agentID-1][0], agentLocationAR[agentID-1][1] = agent.center
 
+    goToExit(i, enemy, southExit)
     # printing tests
 
     
@@ -169,6 +175,7 @@ def animationManage(i):
 
 
 def goToExit(i, patch, exit_patch):
+    global agentLocationAR
     x, y = patch.center
     v_x, v_y = velocity_calc_exit(patch, exit_patch)
 
@@ -312,17 +319,6 @@ def findClosestInterest(agent_patch, in_ar):
             # one that is occupying it
             dis = dis*5
 
-        '''
-        # Add heavy weights to go in front
-        if i == 3 or i == 4 or i == 5 or i == 6 or i == 7:
-
-            if i == 5:
-                dis = dis*0.01
-            elif i == 4 or i == 6:
-                dis = dis*0.15
-            elif i == 3 or i == 7:
-                dis = dis*0.20
-        '''
         # Add heavy weights to avoid the back
         if i == 1 or i == 8 or i == 2:
 
@@ -476,6 +472,40 @@ def velocity_calc_mid(agent_patch, enemy_patch):
     velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    , topSpeed)
 
     return velo_vect[0], velo_vect[1]
+
+
+def checkRadius(user_patch, r):
+    global agentLocationAR
+    
+    for i in range(0,numOfAgents-1):
+        x = agentLocationAR[i][0]
+        y = agentLocationAR[i][1]
+        
+        if(inRadius(user_patch, x, y, r)):
+            # if an agent is in the user's radius
+            print 'Detected agent ', i + 1
+            
+
+def inRadius(self_patch, pointX, pointY, r):
+    # Helps determine if there is something near the using agent
+    
+    x, y = self_patch.center # agent emitting the radius
+    h, k = avoid_patch.center # agent we are trying to avoid
+
+    # Equation of circle
+    # (x-h)^2 + (y-k)^2 <= r^2
+
+    tempX = (x - h)**2
+    tempY = (y - k)**2
+
+    r_2 = r**2
+
+    if tempX + tempY <= r_2:
+        # It is within the radius
+        return True
+    else:
+        return False
+
 
 
 def animateCos(i, patch):
