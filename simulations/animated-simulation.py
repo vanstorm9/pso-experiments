@@ -158,7 +158,7 @@ def animationManage(i):
         agentID = agentID + 1
         followTarget(i, ac, enemy)
 
-        agentLocationAR[agentID-1][0], agentLocationAR[agentID-1][1] = agent.center
+        agentLocationAR[agentID-1][0], agentLocationAR[agentID-1][1] = ac.center
 
     goToExit(i, enemy, southExit)
     # printing tests
@@ -480,11 +480,11 @@ def velocity_calc_mid(agent_patch, enemy_patch):
 
 def checkRadius(user_patch, r):
     global agentLocationAR
-    
+    r = 10
     for i in range(0,numOfAgents-1):
         x = agentLocationAR[i][0]
         y = agentLocationAR[i][1]
-        
+
         if(inRadius(user_patch, x, y, r)):
             # if an agent is in the user's radius
             z = x + y  # useless placeholder line of code
