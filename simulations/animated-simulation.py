@@ -179,6 +179,10 @@ def goToExit(i, patch, exit_patch):
     x, y = patch.center
     v_x, v_y = velocity_calc_exit(patch, exit_patch)
 
+    mid_x, mid_y, rad_x, rad_y = getMidDistance(patch, exit_patch)
+    rad_size = math.sqrt(rad_x**2 + rad_y**2)
+
+    checkRadius(patch, rad_size)
     
     # x position
     x += v_x
@@ -483,15 +487,18 @@ def checkRadius(user_patch, r):
         
         if(inRadius(user_patch, x, y, r)):
             # if an agent is in the user's radius
-            print 'Detected agent ', i + 1
+            z = x + y  # useless placeholder line of code
+            #print 'Detected agent ', i + 1
             
 
 def inRadius(self_patch, pointX, pointY, r):
     # Helps determine if there is something near the using agent
     
     x, y = self_patch.center # agent emitting the radius
-    h, k = avoid_patch.center # agent we are trying to avoid
+    # agent we are trying to avoid
 
+    h = pointX
+    k = pointY    
     # Equation of circle
     # (x-h)^2 + (y-k)^2 <= r^2
 
