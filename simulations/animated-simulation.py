@@ -512,10 +512,12 @@ def checkRadius(user_patch, r):
         x = agentLocationAR[i][0]
         y = agentLocationAR[i][1]
 
-        if(inRadius(user_patch, x, y, r)):
+        if(inSemiRadius(user_patch, x, y, r)):
             # if an agent is in the user's radius
-            print 'Checking agent ', i + 1
-            checkInLine(user_patch, x_se,y_se , x, y)
+            lineBool = checkInLine(user_patch, x_se,y_se , x, y)
+
+            if lineBool:
+                print 'Detected agent ', i
             
             
 
@@ -536,6 +538,31 @@ def inRadius(self_patch, pointX, pointY, r):
     r_2 = r**2
 
     if tempX + tempY <= r_2:
+        # It is within the radius
+        return True
+    else:
+        return False
+
+
+def inSemiRadius(self_patch, pointX, pointY, r):
+    # Helps determine if there is something near the using agent
+    
+    h, k = self_patch.center # agent emitting the radius
+    # agent we are trying to avoid
+    x = pointX
+    y = pointY
+    # Equation of semicircle
+
+    tempTerm = r**2 - (x-h)**2
+
+    if tempTerm < 0:
+        # if this term is negative, that means agent to avoid is out of range
+        return False
+
+    tempEq = k - math.sqrt(tempTerm)
+    
+
+    if y <= tempEq:
         # It is within the radius
         return True
     else:
