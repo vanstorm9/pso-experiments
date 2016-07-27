@@ -371,39 +371,107 @@ def findClosestInterest(agent_patch, in_ar):
         
     return index
 
+def getBypassInterestPoints(user_patch,avoidX, avoidY):
+    # Mainly used by the enemy agent
+    # User agent will find a point around the blocking agent that is closest to
+    # the agent.
+    x,y = user_patch.center
+    rad_range = 10
+
+    tempX = x - avoidX
+    tempY = y - avoidY
+
+    diffR = math.sqrt(tempX**2 + tempY**2)
+
+    # Calculating our target x and y length
+    radX = (rad_range*tempX)/diffR
+    radY = (rad_range*tempY)/diffR
+
+    # Now we calculate the main interest points
+    
+    pt1X = avoidX + radX
+    pt1Y = avoidY - radY
+    
+    ###
+    pt2X = avoidX - radX
+    pt2Y = avoidY + radY
+
+    # Then we must determine which interest point is
+    print 'user: ', x, ' ', y
+    print 'blockAgent: ', avoidX, ' ', avoidY
+    print 'pt1: ', pt1X, ' ', pt1Y
+    print 'pt2: ', pt2X, ' ', pt2Y
+    
+    exit()
+
 def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
     # Check if an agent is in the user's lined range
     global agentLocationAR
     x1 = exit_x
     y1 = exit_y
-    x2, y2 = user_patch.center
+    x2, y2 = user_patch.center  # the user agent
+    x2 = int(x2)
+    y2 = int(y2)
+    
+    # avoidX and avoidY are the agents
+
+    # Check other y-intercepts
+    #return checkYInterRange(x1,y1,x2,y2, avoidX, avoidY)
+    # We will change y intercept to see if anything is near the main line
+    xThresh = 4   # the range limit of the used y intercepts
+    start = x2 - xThresh
+    finish = x2 + xThresh
+
 
     # To avoid division by zero error
     if x2-x1 == 0:
-        # That means that something is directly below the user agent
-        #print 'There is an agent in the way'
-        
-        return True
+        # That means user is directly above the exit
+        # They both share the same x value
+        for xi in range(start, finish):
+            #print avoidX, ' vs ', xi
+            # an agent is directly on the vertical line
+            if avoidX == xi:
+
+                print 'There is an agent in the way'
+                getBypassInterestPoints(user_patch,avoidX, avoidY)
+                return True
+
+
+        return False
+
+    
     else:
-        # We will change y intercept to see if anything is near the main line
-        yThresh = 4   # the range limit of the used y intercepts
-        start = y1 - yThresh
-        finish = y1 + yThresh
 
         for yi in range(start, finish):
-            
+                
             lineEq = ((y2-x2)/(x2-x1))*(avoidX-x1) + yi
 
             if avoidY == lineEq:
                 # There is an agent in its linear path
-                #print 'There is an agent in the way'
+                # Now we must calculate a point to go to in order to go around it
+
+                '''
+                # Calculate perpendicular slope
+                if y2-y1 == 0:
+                    # slope is flat (horizontally)
+                    perpSlope = 0
+                else:
+                    perpSlope = -(x2-x1)/(y2-y1)
+                    
+                perpLineEq = perpSlope*(avoidX-x1) + yi
+                '''
+                    
+
+                    
+                getBypassInterestPoints(user_patch,avoidX, avoidY)
+                    
+
+                    
+                print 'There is an agent in the way'
 
                 return True
-        
+            
         return False
-        
-    
-    
 
 def getDistance(agent_patch, in_ar, index):
     x_a, y_a = agent_patch.center
@@ -516,12 +584,12 @@ def checkRadius(user_patch, r):
     global agentLocationAR
     r = 10
     for i in range(0,numOfAgents-1):
-        x = agentLocationAR[i][0]
-        y = agentLocationAR[i][1]
+        x = int(agentLocationAR[i][0])
+        y = int(agentLocationAR[i][1])
 
         if(inSemiRadius(user_patch, x, y, r)):
             # if an agent is in the user's radius
-            lineBool = checkInLine(user_patch, x_se,y_se , x, y)
+            lineBool = checkInLine(user_patch, int(x_se),int(y_se) , x, y)
 
             if lineBool:
                 print 'Detected agent ', i, ' at (', x,',',y ,') while at (', user_patch.center[0], ' ', user_patch.center[1], ')'
