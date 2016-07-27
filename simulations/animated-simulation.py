@@ -371,6 +371,33 @@ def findClosestInterest(agent_patch, in_ar):
         
     return index
 
+def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
+    # Check if an agent is in the user's lined range
+    global agentLocationAR
+    x1 = exit_x
+    y1 = exit_y
+    x2, y2 = user_patch.center
+
+    # To avoid division by zero error
+    if x2-x1 == 0:
+        # That means that something is directly below the user agent
+        print 'There is an agent in the way'
+        
+        return True
+    else:
+        lineEq = ((y2-x2)/(x2-x1))*(avoidX-x1) + y1
+
+        if avoidY == lineEq:
+            # There is an agent in its linear path
+            print 'There is an agent in the way'
+
+            return True
+        
+        return False
+        
+    
+    
+
 def getDistance(agent_patch, in_ar, index):
     x_a, y_a = agent_patch.center
     x_t = in_ar[index][0]
@@ -487,8 +514,9 @@ def checkRadius(user_patch, r):
 
         if(inRadius(user_patch, x, y, r)):
             # if an agent is in the user's radius
-            z = x + y  # useless placeholder line of code
-            #print 'Detected agent ', i + 1
+            print 'Checking agent ', i + 1
+            checkInLine(user_patch, x_se,y_se , x, y)
+            
             
 
 def inRadius(self_patch, pointX, pointY, r):
