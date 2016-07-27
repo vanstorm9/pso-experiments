@@ -182,8 +182,15 @@ def goToExit(i, patch, exit_patch):
     mid_x, mid_y, rad_x, rad_y = getMidDistance(patch, exit_patch)
     rad_size = math.sqrt(rad_x**2 + rad_y**2)
 
-    checkRadius(patch, rad_size)
+    # Change path if an agent is blocking the exit
+    change_x, change_y = checkRadius(patch, rad_size)
+    #checkRadius(patch, rad_size)
+
+    if ((not (change_x == -9999)) and (not (change_y == -9999))):
+        v_x = change_x
+        v_y = change_y
     
+        
     # x position
     x += v_x
 
@@ -371,7 +378,7 @@ def findClosestInterest(agent_patch, in_ar):
         
     return index
 
-def getBypassInterestPoints(user_patch,avoidX, avoidY):
+def getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y):
     # Mainly used by the enemy agent
     # User agent will find a point around the blocking agent that is closest to
     # the agent.
@@ -388,21 +395,39 @@ def getBypassInterestPoints(user_patch,avoidX, avoidY):
     radY = (rad_range*tempY)/diffR
 
     # Now we calculate the main interest points
-    
-    pt1X = avoidX + radX
-    pt1Y = avoidY - radY
+
+    # Since we are calculating perpendicular points, we reverse the X and Y
+    # in the pt calculation process
+    pt1X = avoidX + radY
+    pt1Y = avoidY - radX
     
     ###
-    pt2X = avoidX - radX
-    pt2Y = avoidY + radY
+    pt2X = avoidX - radY
+    pt2Y = avoidY + radX
 
-    # Then we must determine which interest point is
+    # Then we must determine which interest point is closer to the exit
+
+    pt1Dis = getDistanceScalar(pt1X, pt1Y,exit_x, exit_y)
+    pt2Dis = getDistanceScalar(pt2X, pt2Y,exit_x, exit_y)    
+
+    '''
     print 'user: ', x, ' ', y
     print 'blockAgent: ', avoidX, ' ', avoidY
     print 'pt1: ', pt1X, ' ', pt1Y
     print 'pt2: ', pt2X, ' ', pt2Y
-    
+
     exit()
+    '''
+    
+
+
+
+    # If point 1 is closer to the exit than point 2
+    if(pt1Dis < pt2Dis):
+        return pt1X, pt1Y
+    
+    return pt2X, pt2Y
+    
 
 def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
     # Check if an agent is in the user's lined range
@@ -433,11 +458,11 @@ def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
             if avoidX == xi:
 
                 print 'There is an agent in the way'
-                getBypassInterestPoints(user_patch,avoidX, avoidY)
-                return True
+                tarX, tarY = getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y)
+                return tarX, tarY
 
 
-        return False
+        return -9999, -9999
 
     
     else:
@@ -449,29 +474,19 @@ def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
             if avoidY == lineEq:
                 # There is an agent in its linear path
                 # Now we must calculate a point to go to in order to go around it
-
-                '''
-                # Calculate perpendicular slope
-                if y2-y1 == 0:
-                    # slope is flat (horizontally)
-                    perpSlope = 0
-                else:
-                    perpSlope = -(x2-x1)/(y2-y1)
                     
-                perpLineEq = perpSlope*(avoidX-x1) + yi
-                '''
-                    
-
-                    
-                getBypassInterestPoints(user_patch,avoidX, avoidY)
+                tarX, tarY = getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y)
                     
 
                     
                 print 'There is an agent in the way'
-
-                return True
+                return tarX, tarY
             
-        return False
+        return -9999, -9999
+
+
+def getDistanceScalar(x1, y1, x2, y2):
+    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 def getDistance(agent_patch, in_ar, index):
     x_a, y_a = agent_patch.center
@@ -509,6 +524,14 @@ def top_speed_regulate(curr_speed, top_speed):
         return -top_speed
     else:
         return curr_speed
+
+def velocityCalcScalar(x1, y1, x2, y2):
+    veloX = top_speed_regulate( (x2 - x1)      ,enemyTopSpeed)
+    veloY = top_speed_regulate( (y2 - y1)      ,enemyTopSpeed)
+    print 'veloX: ', veloX
+    print 'veloY: ', veloY
+    return veloX, veloY
+
 
 # Calculate velocity to rush to exit
 def velocity_calc_exit(agent_patch, exit_patch):
@@ -589,12 +612,20 @@ def checkRadius(user_patch, r):
 
         if(inSemiRadius(user_patch, x, y, r)):
             # if an agent is in the user's radius
-            lineBool = checkInLine(user_patch, int(x_se),int(y_se) , x, y)
+            tarX, tarY = checkInLine(user_patch, int(x_se),int(y_se) , x, y)
 
-            if lineBool:
-                print 'Detected agent ', i, ' at (', x,',',y ,') while at (', user_patch.center[0], ' ', user_patch.center[1], ')'
-            
-            
+            if (not (tarX == -9999)) and (not (tarY == -9999)):
+                # We have detected an agent
+                # Now we must change the velocity direction of the user
+                userX = user_patch.center[0]
+                userY = user_patch.center[1]
+                
+                velocityCalcScalar(userX, userY, tarX, tarY)
+                #print 'Detected agent ', i, ' at (', x,',',y ,') while at (', user_patch.center[0], ' ', user_patch.center[1], ')'
+
+                return tarX, tarY
+
+    return -9999, -9999 
 
 def inRadius(self_patch, pointX, pointY, r):
     # Helps determine if there is something near the using agent
