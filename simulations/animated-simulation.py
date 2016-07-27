@@ -383,7 +383,7 @@ def getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y):
     # User agent will find a point around the blocking agent that is closest to
     # the agent.
     x,y = user_patch.center
-    rad_range = 10
+    rad_range = 20
 
     tempX = x - avoidX
     tempY = y - avoidY
@@ -407,9 +407,9 @@ def getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y):
 
     # Then we must determine which interest point is closer to the exit
 
-    pt1Dis = getDistanceScalar(pt1X, pt1Y,exit_x, exit_y)
-    pt2Dis = getDistanceScalar(pt2X, pt2Y,exit_x, exit_y)    
-
+    pt1Dis = int(getDistanceScalar(pt1X, pt1Y,exit_x, exit_y))
+    pt2Dis = int(getDistanceScalar(pt2X, pt2Y,exit_x, exit_y))
+    
     '''
     print 'user: ', x, ' ', y
     print 'blockAgent: ', avoidX, ' ', avoidY
@@ -420,12 +420,15 @@ def getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y):
     '''
     
 
-
+    #print '(', pt1X, ' and ', pt1Y, ') and (', pt2X, ' and ', pt2Y, ')'
+    #print pt1Dis, ' vs ', pt2Dis
+    print int(pt1X), ' vs ', int(pt2X) 
 
     # If point 1 is closer to the exit than point 2
-    if(pt1Dis < pt2Dis):
+    if(int(pt1Dis) <= int(pt2Dis)):
+        print int(pt1X)
         return pt1X, pt1Y
-    
+    print int(pt2X)
     return pt2X, pt2Y
     
 
@@ -443,7 +446,7 @@ def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
     # Check other y-intercepts
     #return checkYInterRange(x1,y1,x2,y2, avoidX, avoidY)
     # We will change y intercept to see if anything is near the main line
-    xThresh = 4   # the range limit of the used y intercepts
+    xThresh = 1   # the range limit of the used y intercepts
     start = x2 - xThresh
     finish = x2 + xThresh
 
