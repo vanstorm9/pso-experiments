@@ -457,7 +457,7 @@ def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
             # an agent is directly on the vertical line
             if avoidX == xi:
 
-                print 'There is an agent in the way'
+                #print 'There is an agent in the way'
                 tarX, tarY = getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y)
                 return tarX, tarY
 
@@ -479,7 +479,7 @@ def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
                     
 
                     
-                print 'There is an agent in the way'
+                #print 'There is an agent in the way'
                 return tarX, tarY
             
         return -9999, -9999
@@ -528,8 +528,6 @@ def top_speed_regulate(curr_speed, top_speed):
 def velocityCalcScalar(x1, y1, x2, y2):
     veloX = top_speed_regulate( (x2 - x1)      ,enemyTopSpeed)
     veloY = top_speed_regulate( (y2 - y1)      ,enemyTopSpeed)
-    print 'veloX: ', veloX
-    print 'veloY: ', veloY
     return veloX, veloY
 
 
@@ -620,7 +618,7 @@ def checkRadius(user_patch, r):
                 userX = user_patch.center[0]
                 userY = user_patch.center[1]
                 
-                velocityCalcScalar(userX, userY, tarX, tarY)
+                tarX, tarY = velocityCalcScalar(userX, userY, tarX, tarY)
                 #print 'Detected agent ', i, ' at (', x,',',y ,') while at (', user_patch.center[0], ' ', user_patch.center[1], ')'
 
                 return tarX, tarY
