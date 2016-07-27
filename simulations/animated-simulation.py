@@ -381,17 +381,24 @@ def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
     # To avoid division by zero error
     if x2-x1 == 0:
         # That means that something is directly below the user agent
-        print 'There is an agent in the way'
+        #print 'There is an agent in the way'
         
         return True
     else:
-        lineEq = ((y2-x2)/(x2-x1))*(avoidX-x1) + y1
+        # We will change y intercept to see if anything is near the main line
+        yThresh = 4   # the range limit of the used y intercepts
+        start = y1 - yThresh
+        finish = y1 + yThresh
 
-        if avoidY == lineEq:
-            # There is an agent in its linear path
-            print 'There is an agent in the way'
+        for yi in range(start, finish):
+            
+            lineEq = ((y2-x2)/(x2-x1))*(avoidX-x1) + yi
 
-            return True
+            if avoidY == lineEq:
+                # There is an agent in its linear path
+                #print 'There is an agent in the way'
+
+                return True
         
         return False
         
@@ -517,7 +524,7 @@ def checkRadius(user_patch, r):
             lineBool = checkInLine(user_patch, x_se,y_se , x, y)
 
             if lineBool:
-                print 'Detected agent ', i
+                print 'Detected agent ', i, ' at (', x,',',y ,') while at (', user_patch.center[0], ' ', user_patch.center[1], ')'
             
             
 
