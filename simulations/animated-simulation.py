@@ -6,6 +6,10 @@ from random import randint
 import random
 import math
 
+keep = False
+keepX = 0
+keepY = 0
+
 ### Variables that we can play with ###
 interestPointVisual = False
 huntEnemy = True
@@ -17,7 +21,12 @@ topSpeed = 0.3
 secondDoor = False
 resultVisual = False
 
+obstacleAvoidance = False
+chargeEnemy = False
+
 maxFrame = 300
+
+agentRadius = 2
 ####################################
 
 
@@ -119,6 +128,13 @@ if secondDoor:
 def init():
     global occupied_ar
     global agentLocationAR
+    global keep
+    global keepX
+    global keepY
+
+    keep = False
+    keepX = 0
+    keepY = 0
     
     #enemy.center = (50, 50)
     enemy.center = (random.randint(1, 100), random.randint(55, 100))
@@ -176,20 +192,42 @@ def animationManage(i):
 
 def goToExit(i, patch, exit_patch):
     global agentLocationAR
+    global keep
+    global keepX
+    global keepY
     x, y = patch.center
     v_x, v_y = velocity_calc_exit(patch, exit_patch)
 
     mid_x, mid_y, rad_x, rad_y = getMidDistance(patch, exit_patch)
     rad_size = math.sqrt(rad_x**2 + rad_y**2)
 
-    # Change path if an agent is blocking the exit
-    change_x, change_y = checkRadius(patch, rad_size)
-    #checkRadius(patch, rad_size)
+    if obstacleAvoidance:
+        if i % 7 == 0:
+            keepX = 0
+            keepY = 0
+            keep = False
+            # Change path if an agent is blocking the exit
+            change_x, change_y = checkRadiusEnemy(patch, rad_size)
+            #checkRadius(patch, rad_size)
 
-    if ((not (change_x == -9999)) and (not (change_y == -9999))):
-        v_x = change_x
-        v_y = change_y
-    
+            if ((not (change_x == -9999)) and (not (change_y == -9999))):
+                v_x = change_x
+                v_y = change_y
+                keepX = change_x
+                keepY = change_y
+                keep = True
+        elif keep:
+            
+            v_x = keepX
+            v_y = keepY
+
+
+    v_x, v_y = attractionFieldExit(patch, x_se, y_se)
+
+    v_rx, v_ry = repulsiveFieldEnemy(patch, 10)
+
+    v_x += v_rx
+    v_y += v_ry
         
     # x position
     x += v_x
@@ -203,6 +241,64 @@ def goToExit(i, patch, exit_patch):
     
     return patch,
 
+def dispersalCalc(user_patch):
+    global agentLocationAR # we need location of agents
+    for i in range(0,numOfAgents-1):
+        if(checkSemiRadius(user_patch, agentRadius)):
+            return True
+
+    return False
+
+
+def attractionFieldExit(user_patch, attr_x, attr_y):
+    x,y = user_patch.center
+
+    netX = (x - attr_x)*enemyTopSpeed*0.03
+    netY = (y - attr_y)*enemyTopSpeed*0.03
+    
+    return -netX, -netY
+
+def repulsiveFieldEnemy(user_patch, repulseRadius):
+    # repulsive field that will be used by the enemy agent
+    global agentLocationAR
+    x,y = user_patch.center
+    totalRepX = 0
+    totalRepY = 0
+
+    scaleConstant = 1000000
+    
+    for i in range(0, numOfAgents-1):  
+        avoidX = agentLocationAR[i][0]
+        avoidY = agentLocationAR[i][1]
+
+        # To check if one of the agents to avoid are in range
+        if getDistanceScalar(x, y, avoidX, avoidY) <= repulseRadius:
+
+            netX = (x - avoidX)*enemyTopSpeed*0.03
+            netY = (y - avoidY)*enemyTopSpeed*0.03
+
+            repX = ((1/abs(netX)) - (1/repulseRadius))*(netX/(abs(netX)**3))
+            repY = ((1/abs(netY)) - (1/repulseRadius))*(netY/(abs(netY)**3))
+        
+            totalRepX += repX
+            totalRepY += repY
+            
+    totalRepX = totalRepX/scaleConstant
+    totalRepY = totalRepY/scaleConstant
+
+    print -totalRepX
+    print -totalRepY
+
+    '''
+    if abs(totalRepX) > 2:
+        totalRepX = 0
+
+    if abs(totalRepY) > 2:
+        totalRepY = 0
+    '''
+
+    return -totalRepX, -totalRepY
+
 def followTarget(i, patch, enemy_patch):
     x, y = patch.center
 
@@ -210,7 +306,6 @@ def followTarget(i, patch, enemy_patch):
     #v_x, v_y = velocity_calc(patch, enemy_patch)
 
     # Will follow midpoint of enemy & exit
-    #interest_ar = getInterestPoints(patch, enemy_patch)
     v_x, v_y = velocity_calc_mid(patch, enemy_patch)  
 
     #print 'Here:'
@@ -318,10 +413,11 @@ def findClosestInterest(agent_patch, in_ar):
     for i in range(minDis,9):
         dis = abs(int(getDistance(agent_patch, in_ar, i)))
 
-
+    
        # Add heavy weights to charge at enemy
-        #if i == 0:
-        #    dis = dis*0.5
+        if chargeEnemy:
+            if i == 0:
+                dis = dis*0.5
 
         
 
@@ -334,9 +430,9 @@ def findClosestInterest(agent_patch, in_ar):
         if i == 1 or i == 8 or i == 2:
 
             if i == 1:
-                dis = dis*2
-            elif i == 2 or i == 8:
                 dis = dis*3
+            elif i == 2 or i == 8:
+                dis = dis*4
             
 
         tempAr[i] = dis
@@ -381,7 +477,7 @@ def findClosestInterest(agent_patch, in_ar):
 def getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y):
     # Mainly used by the enemy agent
     # User agent will find a point around the blocking agent that is closest to
-    # the agent.
+    # the exit.
     x,y = user_patch.center
     rad_range = 20
 
@@ -422,14 +518,15 @@ def getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y):
 
     #print '(', pt1X, ' and ', pt1Y, ') and (', pt2X, ' and ', pt2Y, ')'
     #print pt1Dis, ' vs ', pt2Dis
-    print int(pt1X), ' vs ', int(pt2X) 
+    #print int(pt1X), ' vs ', int(pt2X) 
 
     # If point 1 is closer to the exit than point 2
     if(int(pt1Dis) <= int(pt2Dis)):
         print int(pt1X)
         return pt1X, pt1Y
+    
     print int(pt2X)
-    return pt2X, pt2Y
+    return int(pt2X), int(pt2Y)
     
 
 def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
@@ -446,7 +543,7 @@ def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
     # Check other y-intercepts
     #return checkYInterRange(x1,y1,x2,y2, avoidX, avoidY)
     # We will change y intercept to see if anything is near the main line
-    xThresh = 1   # the range limit of the used y intercepts
+    xThresh = 5   # the range limit of the used y intercepts
     start = x2 - xThresh
     finish = x2 + xThresh
 
@@ -529,8 +626,10 @@ def top_speed_regulate(curr_speed, top_speed):
         return curr_speed
 
 def velocityCalcScalar(x1, y1, x2, y2):
+    
     veloX = top_speed_regulate( (x2 - x1)      ,enemyTopSpeed)
     veloY = top_speed_regulate( (y2 - y1)      ,enemyTopSpeed)
+    
     return veloX, veloY
 
 
@@ -601,10 +700,45 @@ def velocity_calc_mid(agent_patch, enemy_patch):
     velo_vect[0] = top_speed_regulate( (x_e - x)* dis_limit_thresh    , topSpeed)
     velo_vect[1] = top_speed_regulate( (y_e - y)* dis_limit_thresh    , topSpeed)
 
+    '''
+    if dispersalCalc(agent_patch):
+        velo_vect[0] = 0
+        velo_vect[1] = 0
+    '''
     return velo_vect[0], velo_vect[1]
 
 
 def checkRadius(user_patch, r):
+    global agentLocationAR
+    r = 1
+    for i in range(0,numOfAgents-1):
+        x = int(agentLocationAR[i][0])
+        y = int(agentLocationAR[i][1])
+
+        if(inRadius(user_patch, x, y, r)):
+            # if an agent is in the user's radius
+            #print 'Nearby agent detected'
+            return True
+            
+
+    return False
+
+def checkSemiRadius(user_patch, r):
+    global agentLocationAR
+    r = 0.001
+    for i in range(0,numOfAgents-1):
+        x = int(agentLocationAR[i][0])
+        y = int(agentLocationAR[i][1])
+
+        if(inSemiRadius(user_patch, x, y, r)):
+            # if an agent is in the user's radius
+            #print 'Nearby agent detected'
+            return True
+            
+
+    return False
+
+def checkRadiusEnemy(user_patch, r):
     global agentLocationAR
     r = 10
     for i in range(0,numOfAgents-1):
