@@ -24,7 +24,7 @@ resultVisual = False
 #obstacleAvoidance = False
 chargeEnemy = True
 
-maxFrame = 1000
+maxFrame = 2000
 
 agentRadius = 2
 ####################################
@@ -146,17 +146,17 @@ def borderCheck(x,y):
 
     if x < 0:
         x = 0
-        print 'less x'
+
     elif x > 100:
         x = 100
-        print 'more x'
+
 
     if y < 0:
         y = 0
-        print 'less y'
+
     elif y > 100:
         y = 100
-        print 'more y'
+
 
     return x, y
     
@@ -173,7 +173,7 @@ def init():
     keepY = 0
     
     #enemy.center = (50, 50)
-    enemy.center = (random.randint(1, 100), random.randint(55, 100))
+    enemy.center = (random.randint(1, 100), random.randint(40, 100))
     agent.center = (random.randint(1, 100), random.randint(1, 100))
 
     occupied_ar = np.zeros([9])
@@ -309,13 +309,23 @@ def attractionFieldExit(user_patch, attr_x, attr_y):
         if x - attr_x > 20:
             netX = (x - attr_x)
         else:
-            netX = 2*((x - attr_x)/abs((x - attr_x)))
-        if y - attr_y > 20:
+            if x - attr_x == 0:
+                netX = 0
+            else:
+                netX = 5*((x - attr_x)/abs((x - attr_x)))
+
+
+        
+        if y - attr_y > 30:
             netY = (y - attr_y)
         else:
-            netX = 2*((x - attr_x)/abs((x - attr_x)))
+            if y -attr_y == 0:
+                netY = 0
+            else:
+                netY = 50*((y - attr_y)/abs((y - attr_y)))
+                #print 'something y ', netY
     
-    
+
     return -netX, -netY
 
 def repulsiveFieldEnemy(user_patch, repulseRadius):
