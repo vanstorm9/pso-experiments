@@ -21,7 +21,7 @@ topSpeed = 0.3
 secondDoor = False
 resultVisual = False
 
-obstacleAvoidance = False
+#obstacleAvoidance = False
 chargeEnemy = True
 
 maxFrame = 1000
@@ -135,6 +135,32 @@ def victoryCheck(enemy_patch):
 
     return False
 
+def enemyWonCheck(enemy_patch):
+    x,y = enemy_patch.center
+
+    if (x > x_se - 4 and x < x_se + 4) and y <= y_se +4:
+        return True
+    return False
+
+def borderCheck(x,y):
+
+    if x < 0:
+        x = 0
+        print 'less x'
+    elif x > 100:
+        x = 100
+        print 'more x'
+
+    if y < 0:
+        y = 0
+        print 'less y'
+    elif y > 100:
+        y = 100
+        print 'more y'
+
+    return x, y
+    
+
 def init():
     global occupied_ar
     global agentLocationAR
@@ -198,6 +224,10 @@ def animationManage(i):
         print 'Victory!'
         phaseCount += 1
         init()
+    elif enemyWonCheck(enemy):
+        print 'Phase ', phaseCount
+        print 'Failure!'
+        init()
     elif i >= maxFrame - 1:
         print 'Phase ', phaseCount
         phaseCount += 1
@@ -252,7 +282,8 @@ def goToExit(i, patch, exit_patch):
     # y position
     y += v_y*enemyTopSpeed
 
-    
+    x,y = borderCheck(x,y)
+
     patch.center = (x, y)
 
     
@@ -274,15 +305,15 @@ def attractionFieldExit(user_patch, attr_x, attr_y):
     netY = (y - attr_y)
 
     # To prevent slow down when enemy is close to exit
-    if x - attr_x > 20 and y - attr_y > 20:
+    if x - attr_x > 20 or y - attr_y > 20:
         if x - attr_x > 20:
             netX = (x - attr_x)
         else:
-            netX = 0.8*((x - attr_x)/abs((x - attr_x)))
+            netX = 2*((x - attr_x)/abs((x - attr_x)))
         if y - attr_y > 20:
             netY = (y - attr_y)
         else:
-            netX = 0.8*((x - attr_x)/abs((x - attr_x)))
+            netX = 2*((x - attr_x)/abs((x - attr_x)))
     
     
     return -netX, -netY
@@ -295,7 +326,6 @@ def repulsiveFieldEnemy(user_patch, repulseRadius):
     totalRepY = 0
 
     scaleConstant = 1**38
-    #print '++++++++++++++++++++++++++++++++++++++++++++++++++='
     for i in range(0, numOfAgents-1):
         repX = 0
         repY = 0
@@ -326,16 +356,6 @@ def repulsiveFieldEnemy(user_patch, repulseRadius):
     totalRepX = totalRepX/scaleConstant
     totalRepY = totalRepY/scaleConstant
 
-    #print -totalRepX
-    #print -totalRepY
-
-    '''
-    if abs(totalRepX) > 2:
-        totalRepX = 0
-
-    if abs(totalRepY) > 2:
-        totalRepY = 0
-    '''
 
     return -totalRepX, -totalRepY
 
@@ -545,20 +565,6 @@ def getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y):
 
     pt1Dis = int(getDistanceScalar(pt1X, pt1Y,exit_x, exit_y))
     pt2Dis = int(getDistanceScalar(pt2X, pt2Y,exit_x, exit_y))
-    
-    '''
-    print 'user: ', x, ' ', y
-    print 'blockAgent: ', avoidX, ' ', avoidY
-    print 'pt1: ', pt1X, ' ', pt1Y
-    print 'pt2: ', pt2X, ' ', pt2Y
-
-    exit()
-    '''
-    
-
-    #print '(', pt1X, ' and ', pt1Y, ') and (', pt2X, ' and ', pt2Y, ')'
-    #print pt1Dis, ' vs ', pt2Dis
-    #print int(pt1X), ' vs ', int(pt2X) 
 
     # If point 1 is closer to the exit than point 2
     if(int(pt1Dis) <= int(pt2Dis)):
@@ -568,62 +574,6 @@ def getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y):
     print int(pt2X)
     return int(pt2X), int(pt2Y)
     
-
-def checkInLine(user_patch, exit_x, exit_y, avoidX, avoidY):
-    # Check if an agent is in the user's lined range
-    global agentLocationAR
-    x1 = exit_x
-    y1 = exit_y
-    x2, y2 = user_patch.center  # the user agent
-    x2 = int(x2)
-    y2 = int(y2)
-    
-    # avoidX and avoidY are the agents
-
-    # Check other y-intercepts
-    #return checkYInterRange(x1,y1,x2,y2, avoidX, avoidY)
-    # We will change y intercept to see if anything is near the main line
-    xThresh = 5   # the range limit of the used y intercepts
-    start = x2 - xThresh
-    finish = x2 + xThresh
-
-
-    # To avoid division by zero error
-    if x2-x1 == 0:
-        # That means user is directly above the exit
-        # They both share the same x value
-        for xi in range(start, finish):
-            #print avoidX, ' vs ', xi
-            # an agent is directly on the vertical line
-            if avoidX == xi:
-
-                #print 'There is an agent in the way'
-                tarX, tarY = getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y)
-                return tarX, tarY
-
-
-        return -9999, -9999
-
-    
-    else:
-
-        for yi in range(start, finish):
-                
-            lineEq = ((y2-x2)/(x2-x1))*(avoidX-x1) + yi
-
-            if avoidY == lineEq:
-                # There is an agent in its linear path
-                # Now we must calculate a point to go to in order to go around it
-                    
-                tarX, tarY = getBypassInterestPoints(user_patch,avoidX, avoidY, exit_x, exit_y)
-                    
-
-                    
-                #print 'There is an agent in the way'
-                return tarX, tarY
-            
-        return -9999, -9999
-
 
 def getDistanceScalar(x1, y1, x2, y2):
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
@@ -785,29 +735,6 @@ def checkSemiRadius(user_patch, r):
 
     return False
 
-def checkRadiusEnemy(user_patch, r):
-    global agentLocationAR
-    r = 10
-    for i in range(0,numOfAgents-1):
-        x = int(agentLocationAR[i][0])
-        y = int(agentLocationAR[i][1])
-
-        if(inSemiRadius(user_patch, x, y, r)):
-            # if an agent is in the user's radius
-            tarX, tarY = checkInLine(user_patch, int(x_se),int(y_se) , x, y)
-
-            if (not (tarX == -9999)) and (not (tarY == -9999)):
-                # We have detected an agent
-                # Now we must change the velocity direction of the user
-                userX = user_patch.center[0]
-                userY = user_patch.center[1]
-                
-                tarX, tarY = velocityCalcScalar(userX, userY, tarX, tarY)
-                #print 'Detected agent ', i, ' at (', x,',',y ,') while at (', user_patch.center[0], ' ', user_patch.center[1], ')'
-
-                return tarX, tarY
-
-    return -9999, -9999 
 
 def inRadius(self_patch, pointX, pointY, r):
     # Helps determine if there is something near the using agent
