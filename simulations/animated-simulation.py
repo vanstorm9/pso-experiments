@@ -222,18 +222,38 @@ def goToExit(i, patch, exit_patch):
             v_y = keepY
 
 
-    v_x, v_y = attractionFieldExit(patch, x_se, y_se)
+    v_ax, v_ay = attractionFieldExit(patch, x_se, y_se)
 
-    v_rx, v_ry = repulsiveFieldEnemy(patch, 10)
-
-    v_x += v_rx
-    v_y += v_ry
+    v_rx, v_ry = repulsiveFieldEnemy(patch, 5)
+    
+    v_x = v_ax + v_rx
+    v_y = v_ay + v_ry
+    '''
+    if abs(v_rx) > 1:
+        v_x = v_x/abs(v_x/10)
+    if abs(v_ry) > 1:
+        v_y = v_x/abs(v_x/10)
+    '''
+    # Nomalize the magnitude
+    v_x = v_x*enemyTopSpeed*0.03
+    v_y = v_y*enemyTopSpeed*0.03
+    '''
+    if abs(v_x) > 1 or abs(v_y) > 1:
+        print '-------------'
+        print 'Att X: ', v_ax
+        print 'Att Y: ', v_ay
+        print 'Rep X: ', v_rx
+        print 'Rep Y: ', v_ry
+        print 'Total X: ', v_x
+        print 'Total Y: ', v_y
+    '''
+  
         
     # x position
-    x += v_x
+    x += v_x*enemyTopSpeed
 
     # y position
-    y += v_y
+    y += v_y*enemyTopSpeed
 
     
     patch.center = (x, y)
@@ -253,8 +273,8 @@ def dispersalCalc(user_patch):
 def attractionFieldExit(user_patch, attr_x, attr_y):
     x,y = user_patch.center
 
-    netX = (x - attr_x)*enemyTopSpeed*0.03
-    netY = (y - attr_y)*enemyTopSpeed*0.03
+    netX = (x - attr_x)
+    netY = (y - attr_y)
     
     return -netX, -netY
 
@@ -265,29 +285,39 @@ def repulsiveFieldEnemy(user_patch, repulseRadius):
     totalRepX = 0
     totalRepY = 0
 
-    scaleConstant = 1000000
-    
-    for i in range(0, numOfAgents-1):  
+    scaleConstant = 1**38
+    #print '++++++++++++++++++++++++++++++++++++++++++++++++++='
+    for i in range(0, numOfAgents-1):
+        repX = 0
+        repY = 0
+        
         avoidX = agentLocationAR[i][0]
         avoidY = agentLocationAR[i][1]
 
         # To check if one of the agents to avoid are in range
+        #print getDistanceScalar(x, y, avoidX, avoidY)
         if getDistanceScalar(x, y, avoidX, avoidY) <= repulseRadius:
+            #print 'Enemy agent detected'
+            netX = int(x - avoidX)
+            netY = int(y - avoidY)
 
-            netX = (x - avoidX)*enemyTopSpeed*0.03
-            netY = (y - avoidY)*enemyTopSpeed*0.03
+            if netX == 0:
+                netX = 0.25
+            if netY == 0:
+                netY = 0.25
 
             repX = ((1/abs(netX)) - (1/repulseRadius))*(netX/(abs(netX)**3))
             repY = ((1/abs(netY)) - (1/repulseRadius))*(netY/(abs(netY)**3))
+
         
-            totalRepX += repX
-            totalRepY += repY
+        totalRepX = totalRepX + repX
+        totalRepY = totalRepY + repY
             
     totalRepX = totalRepX/scaleConstant
     totalRepY = totalRepY/scaleConstant
 
-    print -totalRepX
-    print -totalRepY
+    #print -totalRepX
+    #print -totalRepY
 
     '''
     if abs(totalRepX) > 2:
