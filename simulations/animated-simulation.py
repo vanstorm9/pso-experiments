@@ -218,26 +218,6 @@ def goToExit(i, patch, exit_patch):
     mid_x, mid_y, rad_x, rad_y = getMidDistance(patch, exit_patch)
     rad_size = math.sqrt(rad_x**2 + rad_y**2)
 
-    if obstacleAvoidance:
-        if i % 7 == 0:
-            keepX = 0
-            keepY = 0
-            keep = False
-            # Change path if an agent is blocking the exit
-            change_x, change_y = checkRadiusEnemy(patch, rad_size)
-            #checkRadius(patch, rad_size)
-
-            if ((not (change_x == -9999)) and (not (change_y == -9999))):
-                v_x = change_x
-                v_y = change_y
-                keepX = change_x
-                keepY = change_y
-                keep = True
-        elif keep:
-            
-            v_x = keepX
-            v_y = keepY
-
 
     v_ax, v_ay = attractionFieldExit(patch, x_se, y_se)
 
@@ -292,6 +272,18 @@ def attractionFieldExit(user_patch, attr_x, attr_y):
 
     netX = (x - attr_x)
     netY = (y - attr_y)
+
+    # To prevent slow down when enemy is close to exit
+    if x - attr_x > 20 and y - attr_y > 20:
+        if x - attr_x > 20:
+            netX = (x - attr_x)
+        else:
+            netX = 0.8*((x - attr_x)/abs((x - attr_x)))
+        if y - attr_y > 20:
+            netY = (y - attr_y)
+        else:
+            netX = 0.8*((x - attr_x)/abs((x - attr_x)))
+    
     
     return -netX, -netY
 
@@ -318,6 +310,7 @@ def repulsiveFieldEnemy(user_patch, repulseRadius):
             netX = int(x - avoidX)
             netY = int(y - avoidY)
 
+            # To deal with division by zero and normaize magnitude of repX and repY
             if netX == 0:
                 netX = 0.2*((x - avoidX)/abs(x - avoidX))
             if netY == 0:
@@ -648,6 +641,7 @@ def getDistance(agent_patch, in_ar, index):
         print 'y_a: ',y_a
         print 'x_t: ',x_t
         print 'y_t: ',y_t
+        init()
     return math.sqrt((x_t - x_a)**2 + (y_t - y_a)**2)
     
 
