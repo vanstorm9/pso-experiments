@@ -22,9 +22,9 @@ secondDoor = False
 resultVisual = False
 
 obstacleAvoidance = False
-chargeEnemy = False
+chargeEnemy = True
 
-maxFrame = 300
+maxFrame = 1000
 
 agentRadius = 2
 ####################################
@@ -123,7 +123,17 @@ if secondDoor:
     ax.add_patch(northExit)
 
 
+def victoryCheck(enemy_patch):
+    global agentLocationAR
+    ex, ey = enemy_patch.center
+
+    rangeVal = 0.8
     
+    for i in range(0, numOfAgents-1):
+        if abs(float(ex-agentLocationAR[i][0])) < rangeVal and  abs(float(ey-agentLocationAR[i][1])) < rangeVal:
+            return True
+
+    return False
 
 def init():
     global occupied_ar
@@ -176,17 +186,24 @@ def animationManage(i):
 
         agentLocationAR[agentID-1][0], agentLocationAR[agentID-1][1] = ac.center
 
+    
+
+        
     goToExit(i, enemy, southExit)
     # printing tests
 
     
-    if i >= maxFrame - 1:
+    if victoryCheck(enemy):
+        print 'Phase ', phaseCount
+        print 'Victory!'
+        phaseCount += 1
+        init()
+    elif i >= maxFrame - 1:
         print 'Phase ', phaseCount
         phaseCount += 1
-        if resultVisual:
-            print occupied_ar
-            print 'Victory: ', victory
-
+    
+    
+        
     return []
 
 
@@ -302,9 +319,9 @@ def repulsiveFieldEnemy(user_patch, repulseRadius):
             netY = int(y - avoidY)
 
             if netX == 0:
-                netX = 0.25
+                netX = 0.2*((x - avoidX)/abs(x - avoidX))
             if netY == 0:
-                netY = 0.25
+                netY = 0.2*((x - avoidX)/abs(x - avoidX))
 
             repX = ((1/abs(netX)) - (1/repulseRadius))*(netX/(abs(netX)**3))
             repY = ((1/abs(netY)) - (1/repulseRadius))*(netY/(abs(netY)**3))
@@ -625,6 +642,12 @@ def getDistance(agent_patch, in_ar, index):
 
 
     # get distance between two particles
+    ans = math.sqrt((x_t - x_a)**2 + (y_t - y_a)**2)
+    if math.isnan(ans):
+        print 'x_a: ',x_a
+        print 'y_a: ',y_a
+        print 'x_t: ',x_t
+        print 'y_t: ',y_t
     return math.sqrt((x_t - x_a)**2 + (y_t - y_a)**2)
     
 
