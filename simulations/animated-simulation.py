@@ -29,6 +29,7 @@ maxFrame = 2000
 agentRadius = 2
 ####################################
 
+victoryCounter = 0
 
 phaseCount = 0
 
@@ -197,7 +198,8 @@ def animationManage(i):
     global timeStep
     global phaseCount
     global maxFrame
-
+    global victoryCounter
+    
     timeStep = i
     
     
@@ -221,8 +223,9 @@ def animationManage(i):
     
     if victoryCheck(enemy):
         print 'Phase ', phaseCount
-        print 'Victory!'
         phaseCount += 1
+        victoryCounter += 1
+        print 'Victory! ', victoryCounter, '/100'
         init()
     elif enemyWonCheck(enemy):
         print 'Phase ', phaseCount
