@@ -24,7 +24,7 @@ resultVisual = False
 #obstacleAvoidance = False
 chargeEnemy = True
 
-maxFrame = 2000
+maxFrame = 9999999999
 
 agentRadius = 2
 ####################################
@@ -133,6 +133,8 @@ def victoryCheck(enemy_patch):
     for i in range(0, numOfAgents-1):
         if abs(float(ex-agentLocationAR[i][0])) < rangeVal and  abs(float(ey-agentLocationAR[i][1])) < rangeVal:
             return True
+        elif int(ex-agentLocationAR[i][0])==0 and int(ey-agentLocationAR[i][1])==0:
+            return True
 
     return False
 
@@ -227,10 +229,13 @@ def animationManage(i):
         victoryCounter += 1
         print 'Victory! ', victoryCounter, '/100'
         init()
+        return []
     elif enemyWonCheck(enemy):
         print 'Phase ', phaseCount
         print 'Failure!'
+        phaseCount += 1
         init()
+        return []
     elif i >= maxFrame - 1:
         print 'Phase ', phaseCount
         phaseCount += 1
@@ -353,11 +358,19 @@ def repulsiveFieldEnemy(user_patch, repulseRadius):
             netX = int(x - avoidX)
             netY = int(y - avoidY)
 
+
             # To deal with division by zero and normaize magnitude of repX and repY
             if netX == 0:
-                netX = 0.2*((x - avoidX)/abs(x - avoidX))
+                if x - avoidX <= 0:
+                    netX = -0.16
+                else:
+                    netX = 0.16
+            
             if netY == 0:
-                netY = 0.2*((x - avoidX)/abs(x - avoidX))
+                if y - avoidY <=0:
+                    netY = -0.16
+                else:
+                    netY = 0.16
 
             repX = ((1/abs(netX)) - (1/repulseRadius))*(netX/(abs(netX)**3))
             repY = ((1/abs(netY)) - (1/repulseRadius))*(netY/(abs(netY)**3))
@@ -463,6 +476,7 @@ def findClosestInterest(agent_patch, in_ar):
     
     # north east is (north/2) + (south/2)
     global occupied_ar
+    global agentLocationAR
     global victory
     global agentID
     global timeStep
@@ -483,6 +497,7 @@ def findClosestInterest(agent_patch, in_ar):
         minDis = 1
 
     # To check agent's distance of all interest points
+    # The agent is comparing the distance of its own location to all the other agents
     for i in range(minDis,9):
         dis = abs(int(getDistance(agent_patch, in_ar, i)))
 
@@ -491,14 +506,15 @@ def findClosestInterest(agent_patch, in_ar):
         if chargeEnemy:
             if i == 0:
                 dis = dis*0.5
-
-        
-
-        if occupied_ar[i] != 0:
+        '''
+        if abs(agentLocationAR[i][0] - agent_patch.center[0]) < 2 or abs(agentLocationAR[i][1] - agent_patch.center[1]) < 2:
+            dis = 10000
+        '''
+        if occupied_ar[i] != 0 and i != agentID-1:
             # we must write a condition so that agent knows it is the
             # one that is occupying it
-            dis = dis*5
-
+            dis = 10000
+            
         # Add heavy weights to avoid the back
         if i == 1 or i == 8 or i == 2:
 
@@ -595,6 +611,15 @@ def getDistance(agent_patch, in_ar, index):
     x_a, y_a = agent_patch.center
     x_t = in_ar[index][0]
     y_t = in_ar[index][1]
+
+    if math.isnan(x_a):
+        x_a = 0
+    if math.isnan(y_a):
+        y_a = 0
+    if math.isnan(x_t):
+        x_t = 0
+    if math.isnan(y_t):
+        y_t = 0
 
 
     # get distance between two particles
